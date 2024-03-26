@@ -1065,9 +1065,14 @@ class Flux_Linkage_Analyzer:
 
     def extract_JMAG_results(self, path, study_name):
 
+        U_linkages = pd.read_csv(path + study_name + "_0_flux_of_fem_coil.csv", skiprows=6)
+        U_linkages = U_linkages.to_numpy() # change csv format to readable array
+        time = U_linkages[:,0] # define x axis data as time
+        rotor_angle = 360*self.config.no_of_rev*time/(max(time) - min(time)),
+        
         fea_data = {
                 "current_peak": self.I_hat,
-                "time_step": self.config.time_step,
+                "rotor_angle": rotor_angle,
                 "csv_folder": path,
                 "study_name": study_name,
             }

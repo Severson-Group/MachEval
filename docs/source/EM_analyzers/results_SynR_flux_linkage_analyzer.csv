@@ -2,4 +2,4 @@ Result,Value,Unit
 results_folder,/eMach/examples/mach_eval_examples/SynR_eval/run_data/jmag_csv/,
 study_name,Example_SynR_Machine_Ind_SynR,
 I_hat,20,A
-time_step,0.0001,s
+rotor_angle,0 to 360 at 5 deg intervals,deg

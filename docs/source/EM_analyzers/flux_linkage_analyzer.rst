@@ -104,7 +104,7 @@ initializes the analyzer class with an explanation of the required configuration
             state_out.conditions.path = results["csv_folder"]
             state_out.conditions.study_name = results["study_name"]
             state_out.conditions.I_hat = results["current_peak"]
-            state_out.conditions.time_step = results["time_step"]
+            state_out.conditions.rotor_angle = results["rotor_angle"]
 
             return state_out
 

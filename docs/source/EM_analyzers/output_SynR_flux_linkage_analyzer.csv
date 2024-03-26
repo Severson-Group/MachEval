@@ -2,4 +2,4 @@ Output,Description
 results_folder,folder where csv outputs are stored
 study_name,name of study
 I_hat,peak current in A
-time_step,time step in s
+rotor_angle,rotor angle array in deg
