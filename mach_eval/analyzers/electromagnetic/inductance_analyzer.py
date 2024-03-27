@@ -10,14 +10,17 @@ class Inductance_Problem:
         torque: numpy array of torque against time or position
     """
 
-    def __init__(self, I_hat, jmag_csv_folder, study_name, time_step):
+    def __init__(self, I_hat, jmag_csv_folder, study_name, rotor_angle, name_of_phases):
         self.I_hat = I_hat
         self.jmag_csv_folder = jmag_csv_folder 
         self.study_name = study_name
-        self.time_step = time_step
+        self.rotor_angle = rotor_angle
+        self.name_of_phases = name_of_phases
 
 
 class Inductance_Analyzer:
+    def __init__(self, clarke_trans_matrix):
+        self.clarke_trans_matrix = clarke_trans_matrix
 
     def analyze(self, problem: Inductance_Problem):
         """Calcuates average torque and torque ripple
@@ -31,83 +34,56 @@ class Inductance_Analyzer:
         path = problem.jmag_csv_folder
         study_name = problem.study_name
         I_hat = problem.I_hat
-        time_step = problem.time_step
+        name_of_phases = problem.name_of_phases
+        rotor_angle = problem.rotor_angle
+        L = {}
 
-        U_linkages = pd.read_csv(path + study_name + "_0_flux_of_fem_coil.csv", skiprows=7)
-        V_linkages = pd.read_csv(path + study_name + "_1_flux_of_fem_coil.csv", skiprows=7)
-        W_linkages = pd.read_csv(path + study_name + "_2_flux_of_fem_coil.csv", skiprows=7)
+        for i in range(len(name_of_phases)):
+            flux_linkages = pd.read_csv(path + study_name + "_%s_flux_of_fem_coil.csv" % i, skiprows=7)
+            #flux_linkages = flux_linkages.to_numpy()
+            L[i] = flux_linkages/I_hat
+            
+        L = np.stack(L.values())
+        L = L[:, :, 1:]
+        L_abc = np.sum(L,axis = 2)
 
-        U_linkages = U_linkages.to_numpy() # change csv format to readable array
-        V_linkages = V_linkages.to_numpy() # change csv format to readable array
-        W_linkages = W_linkages.to_numpy() # change csv format to readable array
+        L_alpha_beta = {}
+        for i in range(len(L_abc[0])):
+            L_alpha_beta[i] = np.dot(self.clarke_trans_matrix,L_abc[:,i].reshape(len(name_of_phases),1))
         
-        time = U_linkages[:,0] # define x axis data as time
-        rotor_angle = time/time_step
-        Uu = U_linkages[:,1] # define y axis data as self inductance
-        Uv = U_linkages[:,2] # define y axis data as mutual inductance
-        Uw = U_linkages[:,3]
-        Vu = V_linkages[:,1]
-        Vv = V_linkages[:,2]
-        Vw = V_linkages[:,3]
-        Wu = W_linkages[:,1]
-        Wv = W_linkages[:,2]
-        Ww = W_linkages[:,3]
-        
-        [Uu_fit, sUu] = self.fit_sin(time, Uu) # carry out calculations on self inductance
-        [Uv_fit, sUv] = self.fit_sin(time, Uv) # carry out calculations on mutual inductance
+        L_dq = {}
+        for i in range(len(L_alpha_beta)):
+            L_dq[i] = np.dot(np.array([[np.cos(problem.rotor_angle[i]), np.sin(problem.rotor_angle[i]), 0], [-np.sin(problem.rotor_angle[i]), np.cos(problem.rotor_angle[i]), 0], [0, 0, 1]]),L_alpha_beta[i])
 
-        #fig1, ax1 = plt.subplots()
-        #ax1.plot(rotor_angle, Uu, "-k", label="y", linewidth=2)
-        #ax1.plot(rotor_angle, Uu_fit["fitfunc"](time), "r-", label="y fit curve", linewidth=2)
-        #ax1.legend(loc="best")
-        #plt.savefig("temp1.svg")
-
-        #fig2, ax2 = plt.subplots()
-        #ax2.plot(rotor_angle, Uv, "-k", label="y", linewidth=2)
-        #ax2.plot(rotor_angle, Uv_fit["fitfunc"](time), "r-", label="y fit curve", linewidth=2)
-        #ax2.legend(loc="best")
-        #plt.savefig("temp2.svg")
-
-        data = self.extract_results(I_hat, sUu, sUv, path, study_name) 
+        data = self.extract_results(L_alpha_beta, L_dq) 
 
         return data
     
-    def fit_sin(self, t, y):
-            fft_func = np.fft.fftfreq(len(t), (t[1]-t[0])) # define fft function with assumed uniform spacing
-            fft_y = abs(np.fft.fft(y)) # carry out fft function for inductance values
-            guess_freq = abs(fft_func[np.argmax(fft_y[1:])+1]) # excluding the zero frequency "peak", which can cause problematic fits
-            guess_amp = np.std(y) # guess amplitude based on one standard deviation
-            guess_offset = np.mean(y) # guess y offset based on average of magnitude
-            guess = np.array([guess_amp, 2.*np.pi*guess_freq, 0, guess_offset]) # arrage in array
-            
-            # define sin function 
-            def sinfunc(t, A, w, p, c):  
-                return A * np.sin(w*t + p) + c
-            
-            popt, pcov = scipy.optimize.curve_fit(sinfunc, t, y, p0=guess) # calculate sin function fit
-            A, w, p, c = popt # assign appropriate variables
-            fitfunc = lambda t: A * np.sin(w*t + p) + c # define fit function for curve fit
-            
-            # define function used to calculate least square
-            def sumfunc(x):
-                return sum((sinfunc(t, x[0], x[1], x[2], x[3]) - y)**2)
-            
-            sUx = scipy.optimize.minimize(fun=sumfunc, x0=np.array([guess_amp, 2.*np.pi*guess_freq, 0, guess_offset])) # calculate matching curve fit values with minimum error
-            return [{"amp": A, "omega": w, "phase": p, "offset": c, "fitfunc": fitfunc}, sUx]
-    
-    def extract_results(self, I_hat, sUu, sUv, path, study_name):
+    def extract_results(self, L_alpha_beta, L_dq):
 
-        Lzero = -2*sUv.x[3]/I_hat; # calculate L0 based on equations in publication
-        Lg = sUv.x[0]/I_hat # calculate Lg based on equations in publication
-        Lls = (sUu.x[3] + 2*sUv.x[3])/I_hat # calculate Lls based on equations in publication
-        Ld = Lls + 3/2*(Lzero - Lg) # calculate Ld based on equations in publication
-        Lq = Lls + 3/2*(Lzero + Lg) # calculate Lq based on equations in publication
+        L_alpha = {}
+        L_beta = {}
+        L_gamma = {}
+        for i in range(len(L_alpha_beta)):
+            L_alpha[i] = float(L_alpha_beta[i][0])
+            L_beta[i] = float(L_alpha_beta[i][1])
+            L_gamma[i] = float(L_alpha_beta[i][2])
+
+        L_d = {}
+        L_q = {}
+        L_zero = {}
+        for i in range(len(L_dq)):
+            L_d[i] = float(L_dq[i][0])
+            L_q[i] = float(L_dq[i][1])
+            L_zero[i] = float(L_dq[i][2])
 
         data = {
-                "Ld": Ld,
-                "Lq": Lq,
-                "csv_folder": path,
-                "study_name": study_name,
+                "Lalpha": L_alpha,
+                "Lbeta": L_beta,
+                "Lgamma": L_gamma,
+                "Ld": L_d,
+                "Lq": L_q,
+                "Lzero": L_zero,
             }
 
         return data

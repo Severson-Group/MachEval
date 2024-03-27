@@ -108,10 +108,8 @@ class Flux_Linkage_Analyzer:
 
         if not valid_design:
             raise InvalidDesign
-        
-        phi_ang = np.linspace(0,-360,4)
 
-        for i in range(len(phi_ang)-1):
+        for i in range(len(self.machine_variant.name_of_phases)):
 
             # Create transient study with two time step sections
             self.study_name = self.project_name + "_Ind_SynR"
@@ -180,9 +178,9 @@ class Flux_Linkage_Analyzer:
     @property
     def z_C(self):
         if len(self.machine_variant.layer_phases) == 1:
-            z_C = self.machine_variant.Q / 3
+            z_C = self.machine_variant.Q / len(self.machine_variant.name_of_phases)
         elif len(self.machine_variant.layer_phases) == 2:
-            z_C = self.machine_variant.Q / 3
+            z_C = self.machine_variant.Q / len(self.machine_variant.name_of_phases)
 
         return z_C
     
@@ -743,8 +741,8 @@ class Flux_Linkage_Analyzer:
         def add_mp_circuit(study, turns, Rs, x=10, y=10):
             # Placing coils/phase windings
             coil_name = []
-            for i in range(0, 3):
-                coil_name.append("coil_" + ['U', 'V', 'W'][i])
+            for i in range(0, len(self.machine_variant.name_of_phases)):
+                coil_name.append("coil_" + self.machine_variant.name_of_phases[i])
                 study.GetCircuit().CreateComponent("Coil", 
                     coil_name[i])
                 study.GetCircuit().CreateInstance(coil_name[i],
@@ -765,8 +763,8 @@ class Flux_Linkage_Analyzer:
             # Placing current sources
             cs_name = []
 
-            for i in range(0, 3):
-                cs_name.append("cs_" + ['U', 'V', 'W'][i])
+            for i in range(0, len(self.machine_variant.name_of_phases)):
+                cs_name.append("cs_" + self.machine_variant.name_of_phases[i])
                 study.GetCircuit().CreateComponent("CurrentSource", cs_name[i])
                 study.GetCircuit().CreateInstance(cs_name[i], x + 4 * i, y + 4)
                 study.GetCircuit().GetInstance(cs_name[i], 0).RotateTo(90)
@@ -776,7 +774,7 @@ class Flux_Linkage_Analyzer:
             # Terminal Voltage/Circuit Voltage: Check for outputting CSV results
             terminal_name = []
             for i in range(0, 1):
-                terminal_name.append("vp_" + ['U', 'V', 'W'][i])
+                terminal_name.append("vp_" + self.machine_variant.name_of_phases[i])
                 study.GetCircuit().CreateTerminalLabel(terminal_name[i], x + 4 * i, y + 2)
                 study.GetCircuit().CreateComponent("VoltageProbe", terminal_name[i])
                 study.GetCircuit().CreateInstance(terminal_name[i], x + 2 + 4 * i, y + 2)
@@ -789,7 +787,7 @@ class Flux_Linkage_Analyzer:
 
         add_mp_circuit(study, self.machine_variant.Z_q, Rs=self.R_wdg)
 
-        for phase_name in ['U', 'V', 'W']:
+        for phase_name in self.machine_variant.name_of_phases:
             study.CreateCondition("FEMCoil", phase_name)
             # link between FEM Coil Condition and Circuit FEM Coil
             condition = study.GetCondition(phase_name)
@@ -865,7 +863,7 @@ class Flux_Linkage_Analyzer:
             subcondition.SetValue("Direction2D", dict_dir[UpDown])
             index += 1
             # clean up
-            for phase_name in ['U', 'V', 'W']:
+            for phase_name in self.machine_variant.name_of_phases:
                 condition = study.GetCondition(phase_name)
                 condition.RemoveSubCondition("delete")
 
@@ -903,7 +901,7 @@ class Flux_Linkage_Analyzer:
 
         DM = app.GetDataManager()
         DM.CreatePointArray("point_array/timevsdivision", "SectionStepTable")
-        refarray = [[0 for i in range(3)] for j in range(3)]
+        refarray = [[0 for i in range(len(self.machine_variant.name_of_phases))] for j in range(len(self.machine_variant.name_of_phases))]
         refarray[0][0] = 0
         refarray[0][1] = 1
         refarray[0][2] = 50
@@ -1075,6 +1073,7 @@ class Flux_Linkage_Analyzer:
                 "rotor_angle": rotor_angle,
                 "csv_folder": path,
                 "study_name": study_name,
+                "name_of_phases": self.machine_variant.name_of_phases,
             }
 
         return fea_data

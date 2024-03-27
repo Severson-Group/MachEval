@@ -54,12 +54,14 @@ class SynR_Flux_Linkage_PostAnalyzer:
         state_out.conditions.study_name = results["study_name"]
         state_out.conditions.I_hat = results["current_peak"]
         state_out.conditions.rotor_angle = results["rotor_angle"]
+        state_out.conditions.name_of_phases = results["name_of_phases"]
 
         print("\n************************ FLUX LINKAGE RESULTS ************************")
         print("path = ", state_out.conditions.path)
         print("study_name = ", state_out.conditions.study_name)
         print("I_hat = ", state_out.conditions.I_hat, " A")
         print("rotor_angle = ", state_out.conditions.rotor_angle, " deg")
+        print("name_of_phases = ", state_out.conditions.name_of_phases)
         print("*************************************************************************\n")
 
         return state_out
