@@ -53,7 +53,7 @@ class Inductance_Analyzer:
         
         L_dq = {}
         for i in range(len(L_alpha_beta)):
-            L_dq[i] = np.dot(np.array([[np.cos(problem.rotor_angle[i]), np.sin(problem.rotor_angle[i]), 0], [-np.sin(problem.rotor_angle[i]), np.cos(problem.rotor_angle[i]), 0], [0, 0, 1]]),L_alpha_beta[i])
+            L_dq[i] = np.dot(np.array([[np.cos(rotor_angle[0][i]), np.sin(rotor_angle[0][i]), 0], [-np.sin(rotor_angle[0][i]), np.cos(rotor_angle[0][i]), 0], [0, 0, 1]]),L_alpha_beta[i])
 
         data = self.extract_results(L_alpha_beta, L_dq) 
 
