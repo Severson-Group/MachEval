@@ -11,7 +11,7 @@ explained. These classes act an extension of the ``mach_opt`` module's ``Designe
 purpose of this extension, is to provide a stronger framework for the flow of information between multiple evaluation steps (i.e. 
 an interdependent multiphysics machine design). These classes are constructed specifically for the design and evaluation of 
 electric machine, however they can be utilized in the optimization of any complex design problem. An example optimization 
-demonstrating the use of the ``mach_eval`` module is provided :doc:`in this document</getting_started/tutorials/analytical_machine_des_tutorial/index>`.
+demonstrating the use of the ``mach_eval`` module is provided :doc:`in this document<../getting_started/tutorials/analytical_machine_des_tutorial/index>`.
 
 MachineDesigner
 ****************
