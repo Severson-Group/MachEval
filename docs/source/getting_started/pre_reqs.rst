@@ -118,7 +118,7 @@ examples provided within the ``examples`` folder to confirm everything is workin
 
 
 More Information on Using Virtual Environments with Python (Approach 1)
-----------------------------------------------------
+------------------------------------------------------------------------
 
 This section has been added to help approach 1 users be more "Python savvy". This section gives an overview of Python virtual
 environments and provides necessary links to enable users to work with virtual environments using VS code.
