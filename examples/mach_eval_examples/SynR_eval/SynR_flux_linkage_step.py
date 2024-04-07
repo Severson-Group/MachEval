@@ -42,6 +42,7 @@ configuration = Flux_Linkage_Config(
     jmag_visible=True,
     non_zero_end_ring_res = False,
     scale_axial_length = True,
+    jmag_version = "21.1",
     time_step = 0.0001
 )
 

@@ -45,6 +45,7 @@ configuration = SynR_EM_Config(
     jmag_visible=True,
     non_zero_end_ring_res = False,
     scale_axial_length = True,
+    jmag_version="22.1",
 )
 
 SynR_em_analysis = SynR_em.SynR_EM_Analyzer(configuration)

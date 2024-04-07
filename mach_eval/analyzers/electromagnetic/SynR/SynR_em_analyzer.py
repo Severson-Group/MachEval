@@ -82,7 +82,12 @@ class SynR_EM_Analyzer:
         if attempts > 1:
             self.project_name = self.project_name + "_attempts_%d" % (attempts)
 
-        toolJmag = JMAG.JmagDesigner()
+        JMAG_exist = os.path.exists("C:/Program Files/JMAG-Designer%s" % self.config.jmag_version)
+        if JMAG_exist is True:
+            toolJmag = JMAG.JmagDesigner(self.config.jmag_version)
+        else:
+            print('WARNING: The JMAG version does not exist, defaulting to newest JMAG version available!')
+            toolJmag = JMAG.JmagDesigner()
 
         toolJmag.visible = self.config.jmag_visible
         toolJmag.open(comp_filepath=expected_project_file, length_unit="DimMillimeter", study_type="Transient2D")
