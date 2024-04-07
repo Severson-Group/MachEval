@@ -1,8 +1,9 @@
 import copy
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.optimize
 import pandas as pd
+import matplotlib as mpl
+import numpy as np
 
 class Inductance_Problem:
     """Problem class for torque data processing
@@ -36,54 +37,50 @@ class Inductance_Analyzer:
         I_hat = problem.I_hat
         name_of_phases = problem.name_of_phases
         rotor_angle = problem.rotor_angle
-        L = {}
+        L_abc = [] 
+        flux_linkages = [] # make mxm list
+        flux_linkages_files = {}
 
-        for i in range(len(name_of_phases)):
-            flux_linkages = pd.read_csv(path + study_name + "_%s_flux_of_fem_coil.csv" % i, skiprows=7)
-            #flux_linkages = flux_linkages.to_numpy()
-            L[i] = flux_linkages/I_hat
-            
-        L = np.stack(L.values())
-        L = L[:, :, 1:]
-        L_abc = np.sum(L,axis = 2)
+        for col in range(len(name_of_phases)):
+            flux_linkages_files[col] = pd.read_csv(path + study_name + "_%s_flux_of_fem_coil.csv" % col, skiprows=6)
+            flux_linkages.append([])
+            L_abc.append([])
+            for row in range(len(name_of_phases)):
+                flux_linkages[col].append(row)
+                L_abc[col].append(row)
+                flux_linkages[col][row] = np.array(flux_linkages_files[col]["coil_%s" % name_of_phases[row]])
+                L_abc[col][row] = flux_linkages[col][row]/I_hat
 
-        L_alpha_beta = {}
-        for i in range(len(L_abc[0])):
-            L_alpha_beta[i] = np.dot(self.clarke_trans_matrix,L_abc[:,i].reshape(len(name_of_phases),1))
+        L_abc = np.array(L_abc)
+        L_alpha_beta = []
+        for i in range(len(L_abc[0][0])):
+            L_alpha_beta.append([])
+            L_alpha_beta[i] = np.dot(self.clarke_trans_matrix,L_abc[:,:,i])
+            L_alpha_beta[i] = np.dot(L_alpha_beta[i],np.linalg.inv(self.clarke_trans_matrix))
+
+        L_alpha_beta = np.array(L_alpha_beta)
         
-        L_dq = {}
+        L_dq = []
         for i in range(len(L_alpha_beta)):
-            L_dq[i] = np.dot(np.array([[np.cos(rotor_angle[0][i]), np.sin(rotor_angle[0][i]), 0], [-np.sin(rotor_angle[0][i]), np.cos(rotor_angle[0][i]), 0], [0, 0, 1]]),L_alpha_beta[i])
+            L_dq.append([])
+            theta = -rotor_angle[0][i]*np.pi/180
+            park_trans_matrix = np.array([[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]])
+            L_dq[i] = np.dot(park_trans_matrix,L_alpha_beta[i,:,:])
+            L_dq[i] = np.dot(L_dq[i],np.linalg.inv(park_trans_matrix))
 
-        data = self.extract_results(L_alpha_beta, L_dq) 
+        L_dq = np.array(L_dq)
+
+        data = self.extract_results(problem, L_alpha_beta, L_dq) 
 
         return data
     
-    def extract_results(self, L_alpha_beta, L_dq):
+    def extract_results(self, problem, L_alpha_beta, L_dq):
 
-        L_alpha = {}
-        L_beta = {}
-        L_gamma = {}
-        for i in range(len(L_alpha_beta)):
-            L_alpha[i] = float(L_alpha_beta[i][0])
-            L_beta[i] = float(L_alpha_beta[i][1])
-            L_gamma[i] = float(L_alpha_beta[i][2])
-
-        L_d = {}
-        L_q = {}
-        L_zero = {}
-        for i in range(len(L_dq)):
-            L_d[i] = float(L_dq[i][0])
-            L_q[i] = float(L_dq[i][1])
-            L_zero[i] = float(L_dq[i][2])
 
         data = {
-                "Lalpha": L_alpha,
-                "Lbeta": L_beta,
-                "Lgamma": L_gamma,
-                "Ld": L_d,
-                "Lq": L_q,
-                "Lzero": L_zero,
+                "rotor_angle": problem.rotor_angle,
+                "Lalphabeta": L_alpha_beta,
+                "Ldq": L_dq,
             }
 
         return data

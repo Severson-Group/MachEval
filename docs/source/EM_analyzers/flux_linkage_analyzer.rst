@@ -56,7 +56,7 @@ initializes the analyzer class with an explanation of the required configuration
     from mach_eval.analyzers.electromagnetic import flux_linkage_analyzer as flux_linkage
     from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer_config import Flux_Linkage_Config
 
-    ############################ Define Electromagnetic Step ###########################
+    ############################ Define Flux Linkage Step ###########################
     class SynR_EM_ProblemDefinition(ProblemDefinition):
         """Converts a State into a problem"""
 
@@ -105,6 +105,15 @@ initializes the analyzer class with an explanation of the required configuration
             state_out.conditions.study_name = results["study_name"]
             state_out.conditions.I_hat = results["current_peak"]
             state_out.conditions.rotor_angle = results["rotor_angle"]
+            state_out.conditions.name_of_phases = results["name_of_phases"]
+
+            print("\n************************ FLUX LINKAGE RESULTS ************************")
+            print("path = ", state_out.conditions.path)
+            print("study_name = ", state_out.conditions.study_name)
+            print("I_hat = ", state_out.conditions.I_hat, " A")
+            print("rotor_angle = ", state_out.conditions.rotor_angle, " deg")
+            print("name_of_phases = ", state_out.conditions.name_of_phases)
+            print("*************************************************************************\n")
 
             return state_out
 
@@ -122,7 +131,7 @@ The ``SynR_flux_linkage_analyzer`` returns a directory holding the results obtai
 of this dictionary and their descriptions are provided below:
 
 .. csv-table:: `SynR_flux_linkage_analyzer Output`
-   :file: output_SynR_flux_linkage_analyzer.csv
+   :file: output_flux_linkage_analyzer.csv
    :widths: 70, 70
    :header-rows: 1
 
@@ -157,10 +166,10 @@ and torque ripple. This analyzer can be run by simply running the ``SynR_evaluat
 
 This example, contained in the aforementioned ``SynR_eval`` folder, should produce the following results:
 
-.. csv-table:: `SynR_flux_linkage_analyzer Results`
-   :file: results_SynR_flux_linkage_analyzer.csv
+.. csv-table:: `flux_linkage_analyzer Results`
+   :file: results_flux_linkage_analyzer.csv
    :widths: 70, 70, 30
    :header-rows: 1
 
-One should expect the csv_folder location to differ depending on where the desired destination is.Within the ``resuls_folder`` there should be a 
+One should expect the csv_folder location to differ depending on where the desired destination is. Within the ``resuls_folder`` there should be a 
 total of 6 csv files that contains the information requested in the ``_step`` file.

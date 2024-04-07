@@ -5,7 +5,7 @@ from mach_eval import AnalysisStep, ProblemDefinition
 from mach_eval.analyzers.electromagnetic import flux_linkage_analyzer as flux_linkage
 from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer_config import Flux_Linkage_Config
 
-############################ Define Electromagnetic Step ###########################
+############################ Define Flux Linkage Step ###########################
 class SynR_EM_ProblemDefinition(ProblemDefinition):
     """Converts a State into a problem"""
 

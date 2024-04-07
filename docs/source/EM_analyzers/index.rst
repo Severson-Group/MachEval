@@ -16,4 +16,4 @@ This section provides documentation for the electromagnetic analyzers supported 
     Winding Factors <winding_factors>
     SynR JMAG 2D FEA <SynR_jmag2d_analyzer>
     Flux Linkage <flux_linkage_analyzer>
-    Inductance/Saliency <inductance_analyzer>
+    Inductance <inductance_analyzer>

@@ -223,6 +223,8 @@ class Flux_Linkage_Analyzer:
         ####################################################
         # Adding parts objects
         ####################################################
+        rotor_rotation = mo.DimDegree(-180 / (2 * self.machine_variant.p))
+        stator_rotation = mo.DimDegree(-540 / self.machine_variant.Q)
         self.stator_core = mo.CrossSectInnerRotorStatorPartial(
             name="StatorCore",
             dim_alpha_st=mo.DimDegree(self.machine_variant.alpha_st),
@@ -238,21 +240,21 @@ class Flux_Linkage_Analyzer:
             dim_r_sb=mo.DimMillimeter(0),
             Q=self.machine_variant.Q,
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)],
-            theta=mo.DimDegree(-180 / self.machine_variant.Q)),
+            theta=stator_rotation),
             )
 
         self.winding_layer1 = mo.CrossSectInnerRotorStatorRightSlot(
             name="WindingLayer1",
             stator_core=self.stator_core,
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)],
-            theta=mo.DimDegree(-180 / self.machine_variant.Q)),
+            theta=stator_rotation),
             )
 
         self.winding_layer2 = mo.CrossSectInnerRotorStatorLeftSlot(
             name="WindingLayer2",
             stator_core=self.stator_core,
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)],
-            theta=mo.DimDegree(-180 / self.machine_variant.Q)),
+            theta=stator_rotation),
             )
 
         self.rotor_core = mo.CrossSectFluxBarrierRotorPartial(
@@ -276,7 +278,8 @@ class Flux_Linkage_Analyzer:
             dim_l_b5=mo.DimMillimeter(self.machine_variant.l_b5),
             dim_l_b6=mo.DimMillimeter(self.machine_variant.l_b6),
             p=2,
-            location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], theta=mo.DimDegree(-180 / (2 * self.machine_variant.p))),
+            location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], 
+            theta=rotor_rotation),
             )
 
         self.shaft = mo.CrossSectHollowCylinder(
