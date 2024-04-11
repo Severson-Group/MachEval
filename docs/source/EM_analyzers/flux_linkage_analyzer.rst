@@ -20,10 +20,11 @@ where :math:`\lambda` is the flux linkage, :math:`L` is the inductance, and :mat
 
 The code is structured such that the ``flux_linkage_analyzer`` contains the code for setting up and running the JMAG simulations based on 
 1) the machine inputs and conditions of the user and 2) the conditions required of the machine to be able to calculate the 
-necessary parameters. In the case of this machine, DC excitement of the U-phase is required with both the V- and W-phases being open. 
+necessary parameters. In the case of each machine, DC excitement of each phase coil occurs with all other coils open. This repeats for 
+each coil until all of the coils have been excited with DC current and all of the flux linkages have been captured. 
 
-This analyzer calculates the self and mutual flux linkages of each coil using JMAG's transient solver. It models a synchronous
-reluctance machine under synchronous operation. The following information document will provide a description of the analyzer inputs and outputs.
+This analyzer calculates the self and mutual flux linkages of each coil using JMAG's transient solver. It models an electric machine 
+under synchronous operation. The following information document will provide a description of the analyzer inputs and outputs.
 
 Input from User
 *********************************
