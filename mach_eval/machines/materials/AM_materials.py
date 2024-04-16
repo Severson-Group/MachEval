@@ -5,6 +5,7 @@ Fe3Si = {
     'rotor_iron_material_density'      : 7650, # kg/m3
     'rotor_iron_youngs_modulus'        : 185E9, # Pa
     'rotor_iron_poission_ratio'        : .3, 
+    'rotor_iron_shear_modulus'         : 185E9 / (2 * (1 + .3)),
     'rotor_iron_material_cost'         : 17087, # $/m3
     'rotor_iron_ironloss_a'            : 1.58,
     'rotor_iron_ironloss_b'            : 1.17,

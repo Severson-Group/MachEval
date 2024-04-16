@@ -293,6 +293,126 @@ class AM_SynR_Rotor_Iron(MachineComponent):
     @property
     def rotor_barrier_mat(self):
         return self._materials_dict["rotor_barrier_mat"]
+    
+
+class Vision_SynR_Rotor_Iron(MachineComponent):
+    @staticmethod
+    def required_dimensions():
+        return (
+            "r_ri",
+            "r_ro",
+            "d_r1",
+            "d_r2",
+            "d_r3",
+            "r_f1",
+            "r_f2",
+            "r_f3",
+            "w_b1",
+            "w_b2",
+            "w_b3",
+            "l_b1",
+            "l_b2",
+            "l_b3",
+            "l_b4",
+            "l_b5",
+            "l_b6",
+            "alpha_b",
+        )
+    
+    @staticmethod
+    def required_parameters():
+        return ("p",)
+
+    @staticmethod
+    def required_materials():
+        return ("rotor_iron_mat",)
+    
+    @staticmethod
+    def required_materials():
+        return ("rotor_barrier_mat",)
+
+    @property
+    def r_ri(self):
+        return self._dimensions_dict["r_ri"]
+    
+    @property
+    def r_ro(self):
+        return self._dimensions_dict["r_ro"]
+    
+    @property
+    def d_r1(self):
+        return self._dimensions_dict["d_r1"]
+    
+    @property
+    def d_r2(self):
+        return self._dimensions_dict["d_r2"]
+    
+    @property
+    def d_r3(self):
+        return self._dimensions_dict["d_r3"]
+    
+    @property
+    def r_f1(self):
+        return self._dimensions_dict["r_f1"]
+    
+    @property
+    def r_f2(self):
+        return self._dimensions_dict["r_f2"]
+    @property
+    def r_f3(self):
+        return self._dimensions_dict["r_f3"]
+    
+    @property
+    def w_b1(self):
+        return self._dimensions_dict["w_b1"]
+    
+    @property
+    def w_b2(self):
+        return self._dimensions_dict["w_b2"]
+    
+    @property
+    def w_b3(self):
+        return self._dimensions_dict["w_b3"]
+    
+    @property
+    def l_b1(self):
+        return self._dimensions_dict["l_b1"]
+    
+    @property
+    def l_b2(self):
+        return self._dimensions_dict["l_b2"]
+    
+    @property
+    def l_b3(self):
+        return self._dimensions_dict["l_b3"]
+    
+    @property
+    def l_b4(self):
+        return self._dimensions_dict["l_b4"]
+    
+    @property
+    def l_b5(self):
+        return self._dimensions_dict["l_b5"]
+    
+    @property
+    def l_b6(self):
+        return self._dimensions_dict["l_b6"]
+    
+    @property
+    def alpha_b(self):
+        return self._dimensions_dict["alpha_b"]
+    
+    @property
+    def lp(self):
+        return self._dimensions_dict["p"]
+
+    @property
+    def rotor_iron_mat(self):
+        return self._materials_dict["rotor_iron_mat"]
+    
+    @property
+    def rotor_barrier_mat(self):
+        return self._materials_dict["rotor_barrier_mat"]
 
 
 class PM(MachineComponent):

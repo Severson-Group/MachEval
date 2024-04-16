@@ -2,7 +2,7 @@
 import os
 
 Arnon5 = {
-    'core_material'              : 'Arnon5', 
+    'core_material'              : 'AArnon55', 
     'core_material_density'      : 7650, # kg/m3
     'core_youngs_modulus'        : 185E9, # Pa
     'core_poission_ratio'        : .3, 
