@@ -31,7 +31,8 @@ Input from User
 To use this analyzer, users must pass in a ``MachineDesign`` object. An instance of the ``MachineDesign`` class can be created by passing in 
 ``machine`` and ``operating_point`` objects. The machine must be a ``SynR_Machine`` and the ``operating_point`` must be of type 
 ``SynR_Machine_Oper_Pt``. More information on both these classes is available in the ``SynR Design`` section under ``MACHINE DESIGNS``. To 
-initialize the ``SynR_JMAG_2D_FEA_Analyzer``, users must also specify analyzer configuration parameters.
+initialize the ``SynR_JMAG_2D_FEA_Analyzer``, users must also specify analyzer configuration parameters. One can control the version of JMAG
+desired for use in this analyzer using ``jmag_version``. For example, the use of JMAG-Designer21.1 would require an input of ``21.1``.
 
 The tables below provide the input expected by the ``MachineDesign`` class and the configuration input required to initialize the 
 ``SynR_JMAG_2D_FEA_Analyzer``.
@@ -217,6 +218,7 @@ A copy of this file lies in the ``eMach\examples\mach_eval_examples\SynR_eval`` 
         jmag_scheduler=False,
         jmag_visible=True,
         scale_axial_length = True,
+        jmag_version=None,
     )
 
     SynR_em_analysis = SynR_em.SynR_EM_Analyzer(configuration)

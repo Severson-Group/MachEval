@@ -1,119 +1,7 @@
-User Guide
-=============================
+``mach_eval`` Module Overview
+##########################################
 
-``eMach`` is an open source codebase designed to facilitate the modeling, evaluation, and optimization of electrical machines. Since machine design is an extremely broad and varied field, ``eMach`` is constructed in a modular and flexible fashion to accommodate many machine topologies, evaluation processes, and optimization criteria. While certain base machine optimizations are provided in this repository, the code is intended for easy extension to produce custom optimizations.
-
-The ``eMach`` codebase is designed to be used by ``pygmo``, an open source Python optimization library. Documentation for the ``pygmo`` library can be found `here <https://esa.github.io/pygmo2/>`_.
-
-
-The ``eMach`` repository contains three sub-modules which interface between ``pygmo`` and each other. 
-
-- The ``mach_opt`` module, short for `Machine Optimization`, is defined to interface with the specified ``fitness`` function call from ``pygmo`` by converting free variables to objective values in a structured format. This module is designed to extend the base functionality of ``pygmo`` to handle design optimizations using abstract classes. 
-- The ``mach_eval`` module is used to evaluate a machine design either produced by ``mach_opt`` or as stand-alone machines that a user has created. ``mach_eval`` is an extension of two of the primary abstract classes in the ``mach_opt`` module which provide additional structure and framework to handle more complicated design evaluations. 
-- The ``mach_cad`` module is used for drawing machine components in CAD tools. It provides an abstraction layer between the machine geometry specification and the CAD tool so that multiple tools can equivalently render the same design. This module is intended to provide a link between ``mach_eval`` and CAD tools. However, this functionality is not yet implemented.
-
-The layered structure of ``eMach`` allows for the higher level modules to be used independently of the lower level packages. 
-
-.. figure:: ./images/getting_started/CodeOverview.svg
-   :alt: Trial1 
-   :align: center
-   :width: 600 
-
-
-The rest of this document will cover both the ``mach_opt`` and ``mach_eval`` modules, explaining their purpose and applications. 
-
-mach_opt Module Overview
-------------------------
-
-.. figure:: ./images/getting_started/desopt_Diagram.svg
-   :alt: Trial1 
-   :align: center
-   :width: 400 
-
-The ``mach_opt`` module is designed to extend the `user-defined problem <https://esa.github.io/pygmo2/tutorials/coding_udp_simple.html>`_ definition prescribed by ``pygmo``. In order for ``pygmo`` to run a multi-objective user-defined problem, the injected object must have three functions implemented: ``fitness``, ``get_bounds``, and ``get_nobj``. The primary class of the ``mach_opt`` module is ``DesignProblem`` which implements these required functions. The flow of information between ``pygmo`` and the ``DesignProblem`` can be visualized in the following flowchart. 
-
-.. figure:: ./images/RectangleExample/DesOptlFlowChart.svg
-   :alt: Trial1 
-   :align: center
-   :width: 300
-
-
-	
-	
-The ``DesignProblem`` class expects to receive several objects upon initialization that comply with defined protocols. (Note: Python's protocol class capability was introduced in `PEP 544 <https://www.python.org/dev/peps/pep-0544/>`_.) These objects and their purpose are summarized as follows:
-
-Designer
-	The ``Designer`` protocol converts an input tuple into a ``design`` object.
-Evaluator
-	The ``Evaluator`` protocol evaluates the ``design`` object for a set of criteria defined in the ``evaluate`` function.
-DesignSpace
-	The ``DesignSpace`` protocol handles converting the results of the evaluation into the objective variables.
-DataHandler
-	Saves the design, evaluation results, and objective values so that optimization can be paused and resumed.
-
-Additional details of each of these objects can be found in the code documentation. An example optimization of a rectangle using the ``mach_opt`` module can be found :doc:`here </getting_started/tutorials/rectangle_tutorial/index>`.
-
-Designer
-~~~~~~~~
-
-The ``Designer`` protocol is used to convert the free variables from the optimization algorithm, into a ``design`` object. The  ``design`` object, does not have any required function calls, and is used as a container for all the information regarding the design which is to be evaluated. In order to be considered a ``Designer`` class, the ``create_design`` function must be implemented using the following function signature. 
-
-.. code-block:: python
-
-	@runtime_checkable
-	class Designer(Protocol):
-		"""Parent class for all designers
-
-		"""
-		@abstractmethod
-		def create_design(self, x: 'tuple') -> 'Design':
-			raise NotImplementedError
-
-Evaluator
-~~~~~~~~~
-
-The ``Evaluator`` protocol is used to define an evaluation procedure for the ``design`` object created by the ``Designer``. In order for a class to fulfill the role of an ``Evaluator``, the function call for the ``evaluate`` method must be defined as follows.
-
-.. code-block:: python
-
-	@runtime_checkable
-	class Evaluator(Protocol):
-		"""Parent class for all design evaluators"""
-		@abstractmethod
-		def evaluate(self, design: 'Design') -> Any:
-			pass
-
-DesignSpace
-~~~~~~~~~~~
-
-The ``DesignSpace`` protocol is used to convert the results of the design evaluation back into a form which is usable by the optimization algorithm and provides additional functions that the ``pygmo`` algorithm requires. The following function signatures must be implemented in order to be considered a ``DesignSpace``.
-
-.. code-block:: python
-
-	class DesignSpace(Protocol):
-		"""Parent class for a optimization DesignSpace classes"""
-		@abstractmethod
-		def check_constraints(self, full_results) -> bool:
-			raise NotImplementedError
-
-		@abstractmethod
-		def n_obj(self) -> int:
-			return NotImplementedError
-
-		@abstractmethod
-		def get_objectives(self, valid_constraints, full_results) -> tuple:
-			raise NotImplementedError
-
-		@abstractmethod
-		def bounds(self) -> tuple:
-			raise NotImplementedError
-
-
-mach_eval Module Overview
--------------------------
-
-
-.. figure:: ./images/getting_started/MachEval.png
+.. figure:: ./images/MachEval.png
    :alt: Trial1 
    :align: center
    :width: 800 
@@ -123,17 +11,17 @@ explained. These classes act an extension of the ``mach_opt`` module's ``Designe
 purpose of this extension, is to provide a stronger framework for the flow of information between multiple evaluation steps (i.e. 
 an interdependent multiphysics machine design). These classes are constructed specifically for the design and evaluation of 
 electric machine, however they can be utilized in the optimization of any complex design problem. An example optimization 
-demonstrating the use of the ``mach_eval`` module is provided :doc:`in this document</getting_started/tutorials/analytical_machine_des_tutorial/index>`.
+demonstrating the use of the ``mach_eval`` module is provided :doc:`in this document<../getting_started/tutorials/analytical_machine_des_tutorial/index>`.
 
 MachineDesigner
-~~~~~~~~~~~~~~~
+****************
 
 The ``MachineDesigner`` class is a concrete implementation of the ``Designer`` protocol from the ``mach_opt`` module. This class is responsible for converting free variables (likely from ``mach_opt``) into a ``MachineDesign`` object. The ``MachineDesign`` object has two attributes: 
 
 - a ``machine`` object that holds all the relevant information about the machine, including geometric dimensions, material properties, nameplate values, and winding specifications. 
 - a ``settings`` object that describes the operating conditions (temperatures, currents/drive settings, operating speed/torques) as well as any other required information to evaluate the design.
 
-.. figure:: ./images/getting_started/MachineDesignerProtocols.svg
+.. figure:: ./images/MachineDesignerProtocols.svg
    :alt: Trial1 
    :align: center
    :width: 800 
@@ -169,7 +57,7 @@ The ``MachineDesigner`` class is a concrete implementation of the ``Designer`` p
    
 The ``MachineDesigner`` requires two objects to be passed in on initialization: an ``Architect`` and a ``SettingsHandler``. These inputs are defined as protocols and are responsible for the creation of the ``machine`` and ``settings`` objects respectively. These two objects are packaged together into a ``MachineDesign`` object which holds all the information about the design to be evaluated.
 
-.. figure:: ./images/getting_started/machineDesignerExample.png
+.. figure:: ./images/machineDesignerExample.png
    :alt: Trial1 
    :align: center
    :width: 800 
@@ -220,11 +108,11 @@ Similar to the ``Architect``, the ``SettingsHandler`` is responsible for creatin
 
 
 MachineEvaluator
-~~~~~~~~~~~~~~~~
+****************
 
 The ``MachineEvaluator`` class implements the ``Evaluator`` protocol from the ``mach_opt`` module. This class extracts evaluation results from the ``MachineDesign`` object created by the ``MachineDesigner``. The evaluation process is split into distinct steps which are described by an ``EvaluationStep`` protocol. These step objects take in an input ``state``, which holds the ``MachineDesign`` and any results from the previous evaluations, preform some evaluation on the design, and then package the results to a new ``state`` object. 
 
-.. figure:: ./images/getting_started/MachineEvaluatorProtocols.svg
+.. figure:: ./images/MachineEvaluatorProtocols.svg
    :alt: Trial1 
    :align: center
    :width: 800 
@@ -291,7 +179,7 @@ Analyzer
 PostAnalyzer
 	Packages the results of the analysis and the initial state back into the return state
 	
-.. figure:: ./images/getting_started/AnalysisStepExample.png
+.. figure:: ./images/AnalysisStepExample.png
    :alt: Trial1 
    :align: center
    :width: 800 
@@ -368,25 +256,3 @@ The ``PostAnalyzer`` takes the results from the ``Analyzer`` and packages it bac
 		@abstractmethod
 		def get_next_state(self, results: Any, state_in: 'State') -> 'State':
 			pass
-			
-Setting Up an Machine Optimization
-----------------------------------
-
-In order to begin a design optimization using ``MachEval``, the end user will need to configure or write the implementation of certain classes. 
-
-Designer
-  *	``Architect``: while ``eMach`` does contain example ``Architect`` classes, oftentimes custom code will be required to match the selected free variables.
-  
-  *	``SettingsHandler``: Similar to the architect, this object will likely need to be adjusted to match the optimization requirements.
-  
-Evaluator
-  *	``EvaluationStep`` s: Custom code for simple evaluations can be written directly as ``EvaluationStep`` objects. For more complicated code, the ``AnalysisStep`` object should be used with the corresponding Analyzers. 
-  
-    *	``ProblemDefinition``: For each ``AnalysisStep``, the user will be required to write a ``ProblemDefinition`` to convert the input state to the required Problem object.
-	
-    *	``PostAnalyzer``: A corresponding ``PostAnalyzer`` is required for each ``Analyzer`` used.
-	
-DesignSpace
-  *	The user must implement the required methods as specified. This is where the objective functions are defined for the optimization.
-	
-Once the user has specified all of the required objects, they can be injected into the ``DesignProblem`` and utilized by the ``pygmo`` optimization code.

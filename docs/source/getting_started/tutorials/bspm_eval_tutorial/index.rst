@@ -199,6 +199,7 @@ is stored in ``State`` for future reference. It is worth noting that the losses 
         num_cpus=4,
         jmag_scheduler=False,
         jmag_visible=False,
+        jmag_version=None,
     )
     em_analysis = em.BSPM_EM_Analyzer(jmag_config)
     # define AnalysysStep for EM evaluation

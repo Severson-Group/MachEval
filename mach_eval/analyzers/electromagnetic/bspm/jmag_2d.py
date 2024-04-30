@@ -53,7 +53,14 @@ class BSPM_EM_Analyzer:
         from .electrical_analysis.JMAG import JMAG
 
         toolJd = JMAG(self.config)
-        app, attempts = toolJd.open(expected_project_file)
+
+        JMAG_exist = os.path.exists("C:/Program Files/JMAG-Designer%s" % self.config.jmag_version)
+        if JMAG_exist is True:
+            app, attempts = toolJd.open(expected_project_file, self.config.jmag_version)
+        else:
+            print('WARNING: The JMAG version does not exist, defaulting to newest JMAG version available!')
+            app, attempts = toolJd.open(expected_project_file)
+
         if attempts > 1:
             self.project_name = self.project_name + "attempts_%d" % (attempts)
 

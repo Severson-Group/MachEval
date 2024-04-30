@@ -1,0 +1,3 @@
+Attribute/function name,Description,Units
+failure_mat,material in which failure occurs,
+speed,speed at which failure occurs,RPM

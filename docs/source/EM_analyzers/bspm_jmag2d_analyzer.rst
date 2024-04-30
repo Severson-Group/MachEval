@@ -51,7 +51,8 @@ Other Configurations
 
 In addition to time step and mesh size, several other changes can be made to the BSPM JMAG analyzer. Most of these configurations are self
 explanatory and are described using comments within the ``JMAG_2D_Config`` class. For example, by setting the ``jmag_visible`` to ``True`` or 
-``False``, users can control whether the JMAG application will be visible while a FEA evaluation is running.
+``False``, users can control whether the JMAG application will be visible while a FEA evaluation is running. One can control the version of JMAG
+desired for use in this analyzer using ``jmag_version``. For example, the use of JMAG-Designer21.1 would require an input of ``21.1``.
 
 Input from User
 *********************************
@@ -197,6 +198,7 @@ is shown below:
         num_cpus=4,
         jmag_scheduler=False,
         jmag_visible=True,
+        jmag_visible=None,
     )
 
     em_analysis = BSPM_EM_Analyzer(jmag_config)

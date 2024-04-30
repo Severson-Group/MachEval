@@ -469,7 +469,7 @@ class DesignSpace:
     def n_obj(self) -> int:
         return self._n_obj
 
-    def get_objectives(self, valid_constraints, full_results) -> tuple:
+    def get_objectives(self, full_results) -> tuple:
         """ Calculates objectives from evaluation results
         
 

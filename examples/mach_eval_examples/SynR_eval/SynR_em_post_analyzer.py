@@ -39,6 +39,7 @@ class SynR_EM_PostAnalyzer:
         results["iron_loss"] = results["iron_loss"]
         results["hysteresis_loss"] = results["hysteresis_loss"]
         results["eddy_current_loss"] = results["eddy_current_loss"]
+        results["coil_flux_linkages"] = results["coil_flux_linkages"]
 
         ############################ calculating volumes ###########################
         machine = state_out.design.machine
@@ -127,7 +128,6 @@ class SynR_EM_PostAnalyzer:
         print("Speed-Power = ", omega_m*np.sqrt(P_out/1000), " RPM\sqrt(kW)") 
         print("Torque density = ", TRV, " Nm/m3",)
         print("Torque ripple = ", torque_ripple)
-        #print("Power = ", P_out, " W")
         print("Power density = ", PRV, " W/m3",)
         print("Efficiency = ", efficiency * 100, " %")
         print("*************************************************************************\n")

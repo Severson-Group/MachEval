@@ -31,11 +31,12 @@ their own custom scripts for using its functionalities.
 
 .. toctree::
     :hidden:
+    :numbered:
 
-    rectangle_tutorial/index
-    analytical_machine_des_tutorial/index
-    analytical_machine_opt_tutorial/index
-    make_electric_machine_tutorial/index
-    bspm_eval_tutorial/index
-    bspm_opti_tutorial/index
+    Rectangle Optimization <rectangle_tutorial/index>
+    Analytical Machine Design <analytical_machine_des_tutorial/index>
+    Analytical Machine Optimization <analytical_machine_opt_tutorial/index>
+    Making an Electric Machine using eMach <make_electric_machine_tutorial/index>
+    BSPM Evaluation <bspm_eval_tutorial/index>
+    BSPM Optimization <bspm_opti_tutorial/index>
 

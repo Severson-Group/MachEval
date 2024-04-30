@@ -1,0 +1,2 @@
+Arguments,Description
+configuration,"object of type SynR_Inductance_Config describing time step, JMAG configurations, etc."

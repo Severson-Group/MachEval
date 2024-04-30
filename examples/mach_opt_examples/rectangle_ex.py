@@ -76,7 +76,7 @@ class RectDesignSpace(mo.DesignSpace):
         self._n_obj = n_obj
         self._bounds = bounds
 
-    def get_objectives(self, valid_constraints, full_results) -> tuple:
+    def get_objectives(self, full_results) -> tuple:
         """ Calculates objectives from evaluation results
         
 

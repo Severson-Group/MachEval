@@ -27,3 +27,4 @@ class JMAG_2D_Config:
         self.num_cpus = kwargs["num_cpus"] # number of cpus or cores used. Only value if multiple_cpus = True
         self.jmag_scheduler = kwargs["jmag_scheduler"] # True if it is desired to schedule jobs instead of solving immediately
         self.jmag_visible = kwargs["jmag_visible"] # JMAG application visible if true
+        self.jmag_version = kwargs["jmag_version"] # JMAG application version

@@ -1,5 +1,6 @@
 from win32com.client import DispatchEx
 import os
+import string
 
 from ..tool_abc import toolabc as abc
 from ..token_draw import TokenDraw
@@ -13,8 +14,12 @@ __all__ += ["JmagDesigner"]
 class JmagDesigner(
     abc.ToolBase, abc.DrawerBase, abc.MakerExtrudeBase, abc.MakerRevolveBase
 ):
-    def __init__(self):
-        self.jd_instance = DispatchEx("designerstarter.InstanceManager")
+    def __init__(self, jmag_version=None):
+        if jmag_version is None:
+            self.jd_instance = DispatchEx("designerstarter.InstanceManager")
+        else:
+            jmag_version = jmag_version.translate(str.maketrans('', '', string.punctuation))
+            self.jd_instance = DispatchEx("designerstarter.InstanceManager.%s" % jmag_version)
         self.jd = None  # JMAG-Designer Application object
         self.geometry_editor = None  # The Geometry Editor object
         self.doc = None  # The document object in Geometry Editor

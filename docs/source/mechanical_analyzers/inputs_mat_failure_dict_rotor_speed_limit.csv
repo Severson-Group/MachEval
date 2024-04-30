@@ -1,0 +1,6 @@
+Argument,Description,Units
+core_yield_strength,Rotor iron core yield strength,Pa
+magnet_ultimate_strength,Magnet ultimate strength,Pa
+sleeve_ultimate_strength,Sleeve ultimate strength,Pa
+shaft_yield_strength,Rotor shaft yield strength,Pa
+adhesive_ultimate_strength,Adhesive ultimate strength ,Pa

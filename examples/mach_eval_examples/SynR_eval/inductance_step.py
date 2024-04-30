@@ -3,9 +3,9 @@ import sys
 import copy
 
 from mach_eval import AnalysisStep, ProblemDefinition
-from mach_eval.analyzers.electromagnetic.SynR import SynR_em_analyzer as SynR_em
+from mach_eval.analyzers.electromagnetic.SynR import SynR_inductance_analyzer as SynR_inductance
 from mach_eval.analyzers.electromagnetic.SynR.SynR_em_config import SynR_EM_Config
-from examples.mach_eval_examples.SynR_eval.SynR_em_post_analyzer import SynR_EM_PostAnalyzer
+from examples.mach_eval_examples.SynR_eval.SynR_inductance_post_analyzer import SynR_Inductance_PostAnalyzer
 
 ############################ Define Electromagnetic Step ###########################
 class SynR_EM_ProblemDefinition(ProblemDefinition):
@@ -16,7 +16,7 @@ class SynR_EM_ProblemDefinition(ProblemDefinition):
 
     def get_problem(state):
 
-        problem = SynR_em.SynR_EM_Problem(
+        problem = SynR_inductance.SynR_Inductance_Problem(
             state.design.machine, state.design.settings)
         return problem
 
@@ -32,8 +32,7 @@ configuration = SynR_EM_Config(
     mesh_air_region_scale=1.05,
 
     only_table_results=False,
-    csv_results=("Torque;Force;FEMCoilFlux;LineCurrent;JouleLoss;TotalDisplacementAngle;"
-                  "JouleLoss_IronLoss;IronLoss_IronLoss;HysteresisLoss_IronLoss;FEMCoilInductance"),
+    csv_results=("FEMCoilFlux"),
     del_results_after_calc=False,
     run_folder=os.path.dirname(__file__) + "/run_data/",
     jmag_csv_folder=os.path.dirname(__file__) + "/run_data/jmag_csv/",
@@ -45,9 +44,9 @@ configuration = SynR_EM_Config(
     jmag_visible=True,
     non_zero_end_ring_res = False,
     scale_axial_length = True,
-    jmag_version="22.1",
+    jmag_version="21.1",
 )
 
-SynR_em_analysis = SynR_em.SynR_EM_Analyzer(configuration)
+SynR_inductance_analysis = SynR_inductance.SynR_Inductance_Analyzer(configuration)
 
-electromagnetic_step = AnalysisStep(SynR_EM_ProblemDefinition, SynR_em_analysis, SynR_EM_PostAnalyzer)
+inductance_step = AnalysisStep(SynR_EM_ProblemDefinition, SynR_inductance_analysis, SynR_Inductance_PostAnalyzer)

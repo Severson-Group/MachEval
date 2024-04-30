@@ -1,0 +1,5 @@
+Argument,Description,Units
+r_sh,Shaft Radius,m
+L,Length of shaft,m
+beta_l,Boundary condition numerical constant,
+material,Shaft material dictionary,

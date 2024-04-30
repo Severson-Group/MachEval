@@ -11,12 +11,11 @@ from mach_eval.analyzers.electromagnetic.stator_wdg_res import(
 )
 from mach_cad.tools import jmag as JMAG
 
-class SynR_EM_Problem:
+class SynR_Inductance_Problem:
     def __init__(self, machine, operating_point):
         self.machine = machine
         self.operating_point = operating_point
         self._validate_attr()
-        self._check_geom()
 
     def _validate_attr(self):
         if 'SynR_Machine' in str(type(self.machine)):
@@ -28,22 +27,9 @@ class SynR_EM_Problem:
             pass
         else:
             raise TypeError("Invalid settings type")
-        
-    def _check_geom(self):
-        x1 = (self.machine.r_ri + self.machine.d_r1 + self.machine.w_b1/2 - self.machine.l_b4/2)*np.cos(np.pi/4)
-        y1 = self.machine.l_b1 + self.machine.w_b1/2 + (self.machine.l_b4/2 + self.machine.d_r1 + self.machine.r_ri)*np.cos(np.pi/4)
-        r_ro_compare1 = np.sqrt(x1**2 + y1**2)
-        x2 = (self.machine.r_ri + self.machine.d_r1 + self.machine.w_b1 + self.machine.d_r2 + self.machine.w_b2/2 - self.machine.l_b5/2)*np.cos(np.pi/4)
-        y2 = self.machine.l_b2 + self.machine.w_b2/2 + (self.machine.r_ri + self.machine.d_r1 + self.machine.w_b1 + self.machine.d_r2 + self.machine.l_b5/2)*np.cos(np.pi/4)
-        r_ro_compare2 = np.sqrt(x2**2 + y2**2)
-        if r_ro_compare1 < 0.99*self.machine.r_ro and r_ro_compare2 < 0.99*self.machine.r_ro and self.machine.l_b4 > 1.25*self.machine.w_b1 and self.machine.l_b5 > 1.25*self.machine.w_b2:
-            print("\nGeometry is valid!")
-            print("\n")
-        else:
-            raise InvalidDesign("Invalid Geometry - Flux Barriers Don't Fit")
 
 
-class SynR_EM_Analyzer:
+class SynR_Inductance_Analyzer:
     def __init__(self, configuration):
         self.config = configuration
 
@@ -56,7 +42,7 @@ class SynR_EM_Analyzer:
         ####################################################
         
         self.project_name = self.machine_variant.name
-        expected_project_file = self.config.run_folder + "%s.jproj" % self.project_name
+        expected_project_file = self.config.run_folder + "_Ind" + "%s.jproj" % self.project_name
 
         # Create output folder
         if not os.path.isdir(self.config.jmag_csv_folder):
@@ -93,7 +79,7 @@ class SynR_EM_Analyzer:
         toolJmag.open(comp_filepath=expected_project_file, length_unit="DimMillimeter", study_type="Transient2D")
         toolJmag.save()
 
-        self.study_name = self.project_name + "_Tran_SynR"
+        self.study_name = self.project_name + "_Ind_SynR"
         self.design_results_folder = (
             self.config.run_folder + "%s_results/" % self.project_name
         )
@@ -141,7 +127,7 @@ class SynR_EM_Analyzer:
         # Set current excitation
         I = self.I_hat
         phi_0 = self.operating_point.phi_0
-        self.set_currents_sequence(I, self.drive_freq,
+        self.set_currents_sequence(I, 0.0001,
                 phi_0, app, study)
 
         # Add time step settings
@@ -196,7 +182,7 @@ class SynR_EM_Analyzer:
             z_C = self.machine_variant.Q / 3
 
         return z_C
-
+    
     @property
     def stator_resistance(self):
         res_prob = StatorWindingResistanceProblem(
@@ -213,7 +199,7 @@ class SynR_EM_Analyzer:
             Kov=self.machine_variant.Kov,
             sigma_cond=self.machine_variant.coil_mat["copper_elec_conductivity"],
             slot_area=self.machine_variant.s_slot*1e-6,
-            n_layers=self.machine_variant.no_of_layers,
+            n_layers=self.machine_variant.no_of_layers,            
         )
         res_analyzer = StatorWindingResistanceAnalyzer()
         stator_resistance = res_analyzer.analyze(res_prob)
@@ -231,14 +217,11 @@ class SynR_EM_Analyzer:
     def R_wdg_coil_sides(self):
         return self.R_wdg - self. R_wdg_coil_ends
 
+
     def draw_machine(self, tool):
         ####################################################
         # Adding parts objects
         ####################################################
-
-        rotor_rotation = mo.DimDegree(-180 / (2 * self.machine_variant.p))
-        stator_rotation = mo.DimDegree(-(180+720) / self.machine_variant.Q)
-
         self.stator_core = mo.CrossSectInnerRotorStatorPartial(
             name="StatorCore",
             dim_alpha_st=mo.DimDegree(self.machine_variant.alpha_st),
@@ -254,21 +237,21 @@ class SynR_EM_Analyzer:
             dim_r_sb=mo.DimMillimeter(0),
             Q=self.machine_variant.Q,
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)],
-            theta=stator_rotation),
+            theta=mo.DimDegree(-180 / self.machine_variant.Q)),
             )
 
         self.winding_layer1 = mo.CrossSectInnerRotorStatorRightSlot(
             name="WindingLayer1",
             stator_core=self.stator_core,
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)],
-            theta=stator_rotation),
+            theta=mo.DimDegree(-180 / self.machine_variant.Q)),
             )
 
         self.winding_layer2 = mo.CrossSectInnerRotorStatorLeftSlot(
             name="WindingLayer2",
             stator_core=self.stator_core,
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)],
-            theta=stator_rotation),
+            theta=mo.DimDegree(-180 / self.machine_variant.Q)),
             )
 
         self.rotor_core = mo.CrossSectFluxBarrierRotorPartial(
@@ -292,8 +275,7 @@ class SynR_EM_Analyzer:
             dim_l_b5=mo.DimMillimeter(self.machine_variant.l_b5),
             dim_l_b6=mo.DimMillimeter(self.machine_variant.l_b6),
             p=2,
-            location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], 
-            theta=rotor_rotation),
+            location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], theta=mo.DimDegree(-180 / (2 * self.machine_variant.p))),
             )
 
         self.shaft = mo.CrossSectHollowCylinder(
@@ -395,11 +377,11 @@ class SynR_EM_Analyzer:
         )  # this is also useful for string beginning with digiterations '15 Steel'.
         tuple_list = [(key, the_dict[key]) for key in sorted_key]
         if not toString:
-            print("- Bearingless SynR Individual #%s\n\t" % name, end=" ")
+            print("- SynR Individual #%s\n\t" % name, end=" ")
             print(", \n\t".join("%s = %s" % item for item in tuple_list))
             return ""
         else:
-            return "\n- Bearingless SynR Individual #%s\n\t" % name + ", \n\t".join(
+            return "\n- SynR Individual #%s\n\t" % name + ", \n\t".join(
                 "%s = %s" % item for item in tuple_list
             )
 
@@ -780,7 +762,7 @@ class SynR_EM_Analyzer:
             
             # Placing current sources
             cs_name = []
-            for i in range(0, 3):
+            for i in range(0, 1):
                 cs_name.append("cs_" + ['U', 'V', 'W'][i])
                 study.GetCircuit().CreateComponent("CurrentSource", cs_name[i])
                 study.GetCircuit().CreateInstance(cs_name[i], x + 4 * i, y + 4)
@@ -790,7 +772,7 @@ class SynR_EM_Analyzer:
 
             # Terminal Voltage/Circuit Voltage: Check for outputting CSV results
             terminal_name = []
-            for i in range(0, 3):
+            for i in range(0, 1):
                 terminal_name.append("vp_" + ['U', 'V', 'W'][i])
                 study.GetCircuit().CreateTerminalLabel(terminal_name[i], x + 4 * i, y + 2)
                 study.GetCircuit().CreateComponent("VoltageProbe", terminal_name[i])
@@ -889,7 +871,7 @@ class SynR_EM_Analyzer:
         # Setting current values after creating a circuit using "add_mp_circuit" method
         # "freq" variable cannot be used here. So pay extra attention when you 
         # create new case of a different freq.
-        for i in range(0, 3):
+        for i in range(0, 1):
             func = app.FunctionFactory().Composite()
             f1 = app.FunctionFactory().Sin(I, freq,
                 - 360 / 3 * i + phi_0 + 90)
@@ -1062,49 +1044,13 @@ class SynR_EM_Analyzer:
         return list_region_objects
 
     def extract_JMAG_results(self, path, study_name):
-        current_csv_path = path + study_name + "_circuit_current.csv"
-        torque_csv_path = path + study_name + "_torque.csv"
-        force_csv_path = path + study_name + "_force.csv"
-        iron_loss_path = path + study_name + "_iron_loss_loss.csv"
-        hysteresis_loss_path = path + study_name + "_hysteresis_loss_loss.csv"
-        eddy_current_loss_path = path + study_name + "_joule_loss_loss.csv"
-        ohmic_loss_path = path + study_name + "_joule_loss.csv"
-        fem_coil_flux_path = path + study_name + "_inductance_of_fem_coil.csv"
+        fem_coil_flux_path = path + study_name + "_flux_of_fem_coil.csv"
 
-        curr_df = pd.read_csv(current_csv_path, skiprows=6)
-        tor_df = pd.read_csv(torque_csv_path, skiprows=6)
-        force_df = pd.read_csv(force_csv_path, skiprows=6)
-        iron_df = pd.read_csv(iron_loss_path, skiprows=6)
-        hyst_df = pd.read_csv(hysteresis_loss_path, skiprows=6)
-        eddy_df = pd.read_csv(eddy_current_loss_path, skiprows=6)
-        ohmic_df = pd.read_csv(ohmic_loss_path, skiprows=6)
-        flux_df = pd.read_csv(fem_coil_flux_path, skiprows=6)
-
-        curr_df = curr_df.set_index("Time(s)")
-        tor_df = tor_df.set_index("Time(s)")
-        force_df = force_df.set_index("Time(s)")
-        eddy_df = eddy_df.set_index("Frequency(Hz)")
-        hyst_df = hyst_df.set_index("Frequency(Hz)")
-        iron_df = iron_df.set_index("Frequency(Hz)")
-        ohmic_df = ohmic_df.set_index("Time(s)")
-        flux_df = flux_df.set_index("Time(s)")
+        flux_df = pd.read_csv(fem_coil_flux_path, skiprows=7)
 
         fea_data = {
-            "current": curr_df,
-            "torque": tor_df,
-            "force": force_df,
-            "iron_loss": iron_df,
-            "hysteresis_loss": hyst_df,
-            "eddy_current_loss": eddy_df,
-            "ohmic_loss": ohmic_df,
-            "no_of_steps": self.config.no_of_steps,
-            "no_of_rev": self.config.no_of_rev,
-            "scale_axial_length": self.config.scale_axial_length,          
-            "drive_freq": self.drive_freq,
-            "stator_wdg_resistances": [self.R_wdg, self.R_wdg_coil_ends, self.R_wdg_coil_sides],
-            "stator_slot_area": self.stator_slot_area,
             "coil_flux_linkages": flux_df,
-            "rotor_speed": (self.operating_point.speed * self.operating_point.speed_ratio)
+            "current_peak": self.I_hat,
         }
 
         return fea_data

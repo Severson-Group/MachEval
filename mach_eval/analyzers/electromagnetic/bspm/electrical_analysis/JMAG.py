@@ -1,6 +1,7 @@
 import win32com.client
 import os
 import logging
+import string
 
 EPS = 0.01  # mm
 
@@ -28,9 +29,13 @@ class JMAG(object):  # < ToolBase & DrawerBase & MakerExtrudeBase & MakerRevolve
 
         self.config = configuration
 
-    def open(self, expected_project_file_path):
+    def open(self, expected_project_file_path, jmag_version=None):
         if self.app is None:
-            app = win32com.client.Dispatch("designer.Application")
+            if jmag_version is None:
+                app = win32com.client.Dispatch("designer.Application")
+            else:
+                jmag_version = jmag_version.translate(str.maketrans('', '', string.punctuation))
+                app = win32com.client.Dispatch("designer.Application.%s" % jmag_version)
             if self.config.jmag_visible == True:
                 app.Show()
             else:
