@@ -232,7 +232,7 @@ class SynR_EM_Analyzer:
         ####################################################
 
         rotor_rotation = mo.DimDegree(-180 / (2 * self.machine_variant.p))
-        stator_rotation = mo.DimDegree(-180 / self.machine_variant.Q)
+        stator_rotation = mo.DimDegree(-(180+720) / self.machine_variant.Q)
 
         self.stator_core = mo.CrossSectInnerRotorStatorPartial(
             name="StatorCore",
