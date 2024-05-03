@@ -1,7 +1,7 @@
 Inductance Analyzer
 ########################################################################
 
-This analyzer enables the inductance evaluation of a **3-phase** electric machine using raw data from 2D FEA simulations using JMAG.
+This analyzer enables the inductance evaluation of a multi-phase electric machine using raw data from 2D FEA simulations using JMAG.
 
 Model Background
 ****************
@@ -11,7 +11,7 @@ within an electric machine can come from multiple sources, including its own ele
 flowing through other phases of the machine. Understanding the inductance characteristics of an electric machine leads to finding
 any saliency that an electric machine rotor may have. In some electric machines, such as reluctance or induction machines,
 saliency exists and aids in producing electromagnetic torque between the rotor and stator. This can be seen in the torque equation
-for a 3-phase machine:
+for an electric machine:
 
 .. math::
 

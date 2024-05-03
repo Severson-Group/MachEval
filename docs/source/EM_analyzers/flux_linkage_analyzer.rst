@@ -1,7 +1,7 @@
 Flux Linkage Analyzer
 ########################################################################
 
-This analyzer enables the flux linkage evaluation of a **3-phase** electric machine after running 2D FEA simulations using JMAG.
+This analyzer enables the flux linkage evaluation of a mutli-phase electric machine after running 2D FEA simulations using JMAG.
 
 Model Background
 ****************
