@@ -11,7 +11,7 @@ from mach_eval.analyzers.electromagnetic.stator_wdg_res import(
 )
 from mach_cad.tools import jmag as JMAG
 
-class AM_SynR_EM_Problem:
+class Square_SynR_EM_Problem:
     def __init__(self, machine, operating_point):
         self.machine = machine
         self.operating_point = operating_point
@@ -19,25 +19,26 @@ class AM_SynR_EM_Problem:
         self._check_geom()
 
     def _validate_attr(self):
-        if 'AM_SynR_Machine' in str(type(self.machine)):
+        if 'Square_SynR_Machine' in str(type(self.machine)):
             pass
         else:
             raise TypeError("Invalid machine type")
 
-        if 'AM_SynR_Machine_Oper_Pt' in str(type(self.operating_point)):
+        if 'Square_SynR_Machine_Oper_Pt' in str(type(self.operating_point)):
             pass
         else:
             raise TypeError("Invalid settings type")
         
     def _check_geom(self):
-        r_ro_compare = self.machine.r_ri + self.machine.d_r1 + np.sqrt(2)*self.machine.w_b1 + self.machine.d_r2 + np.sqrt(2)*self.machine.w_b2
-        if r_ro_compare < self.machine.r_ro:
+        r_ro_compare1 = self.machine.r_ri + self.machine.d_r1 + np.sqrt(2)*self.machine.w_b1 + self.machine.d_r2 + np.sqrt(2)*self.machine.w_b2
+        r_ro_compare2 = (self.machine.r_ri + self.machine.d_r1)/np.cos(np.pi/(2*self.machine.p))
+        if r_ro_compare1 < self.machine.r_ro and r_ro_compare2 > self.machine.r_ro:
             print("\nGeometry is valid!")
             print("\n")
         else:
             raise InvalidDesign("Invalid Geometry")
 
-class AM_SynR_EM_Analyzer:
+class Square_SynR_EM_Analyzer:
     def __init__(self, configuration):
         self.config = configuration
 
@@ -82,7 +83,7 @@ class AM_SynR_EM_Analyzer:
         toolJmag.open(comp_filepath=expected_project_file, length_unit="DimMillimeter", study_type="Transient2D")
         toolJmag.save()
 
-        self.study_name = self.project_name + "_Tran_AM_SynR"
+        self.study_name = self.project_name + "_Tran_Square_SynR"
         self.design_results_folder = (
             self.config.run_folder + "%s_results/" % self.project_name
         )
@@ -267,7 +268,7 @@ class AM_SynR_EM_Analyzer:
             theta=stator_rotation),
             )
 
-        self.rotor_core_1i = mo.CrossSectFluxBarrierRotorAMPartial_Iron1(
+        self.rotor_core_1i = mo.CrossSectFluxBarrierRotorSquarePartial_Iron1(
             name="RotorCore1i",
             dim_r_ri=mo.DimMillimeter(self.machine_variant.r_ri),
             dim_r_ro=mo.DimMillimeter(self.machine_variant.r_ro),
@@ -279,7 +280,7 @@ class AM_SynR_EM_Analyzer:
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], theta=rotor_rotation),
             )
         
-        self.rotor_core_2i = mo.CrossSectFluxBarrierRotorAMPartial_Iron2(
+        self.rotor_core_2i = mo.CrossSectFluxBarrierRotorSquarePartial_Iron2(
             name="RotorCore2i",
             dim_r_ri=mo.DimMillimeter(self.machine_variant.r_ri),
             dim_r_ro=mo.DimMillimeter(self.machine_variant.r_ro),
@@ -291,7 +292,7 @@ class AM_SynR_EM_Analyzer:
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], theta=rotor_rotation),
             )
         
-        self.rotor_core_3i = mo.CrossSectFluxBarrierRotorAMPartial_Iron3(
+        self.rotor_core_3i = mo.CrossSectFluxBarrierRotorSquarePartial_Iron3(
             name="RotorCore3i",
             dim_r_ri=mo.DimMillimeter(self.machine_variant.r_ri),
             dim_r_ro=mo.DimMillimeter(self.machine_variant.r_ro),
@@ -303,7 +304,7 @@ class AM_SynR_EM_Analyzer:
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], theta=rotor_rotation),
             )
         
-        self.rotor_core_1b = mo.CrossSectFluxBarrierRotorAMPartial_Barrier1(
+        self.rotor_core_1b = mo.CrossSectFluxBarrierRotorSquarePartial_Barrier1(
             name="RotorCore1b",
             dim_r_ri=mo.DimMillimeter(self.machine_variant.r_ri),
             dim_r_ro=mo.DimMillimeter(self.machine_variant.r_ro),
@@ -315,7 +316,7 @@ class AM_SynR_EM_Analyzer:
             location=mo.Location2D(anchor_xy=[mo.DimMillimeter(0), mo.DimMillimeter(0)], theta=rotor_rotation),
             )
         
-        self.rotor_core_2b = mo.CrossSectFluxBarrierRotorAMPartial_Barrier2(
+        self.rotor_core_2b = mo.CrossSectFluxBarrierRotorSquarePartial_Barrier2(
             name="RotorCore2b",
             dim_r_ri=mo.DimMillimeter(self.machine_variant.r_ri),
             dim_r_ro=mo.DimMillimeter(self.machine_variant.r_ro),
@@ -482,11 +483,11 @@ class AM_SynR_EM_Analyzer:
         )  # this is also useful for string beginning with digiterations '15 Steel'.
         tuple_list = [(key, the_dict[key]) for key in sorted_key]
         if not toString:
-            print("- AM SynR Individual #%s\n\t" % name, end=" ")
+            print("- Square SynR Individual #%s\n\t" % name, end=" ")
             print(", \n\t".join("%s = %s" % item for item in tuple_list))
             return ""
         else:
-            return "\n- AM SynR Individual #%s\n\t" % name + ", \n\t".join(
+            return "\n- Square SynR Individual #%s\n\t" % name + ", \n\t".join(
                 "%s = %s" % item for item in tuple_list
             )
 

@@ -14,6 +14,7 @@ from .breadloaf import *
 from .arc import*
 from .flux_barrier_rotor import*
 from .flux_barrier_rotor_AM import*
+from .flux_barrier_rotor_square import*
 from .flux_barrier_rotor_vision import *
 from .inner_reluctance_rotor import*
 from .inner_rotor_round_slots import *
@@ -36,6 +37,7 @@ __all__ += breadloaf.__all__
 __all__ += arc.__all__
 __all__ += flux_barrier_rotor.__all__
 __all__ += flux_barrier_rotor_AM.__all__
+__all__ += flux_barrier_rotor_square.__all__
 __all__ += flux_barrier_rotor_vision.__all__
 __all__ += inner_reluctance_rotor.__all__
 __all__ += inner_rotor_round_slots.__all__

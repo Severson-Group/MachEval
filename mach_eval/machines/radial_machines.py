@@ -295,6 +295,67 @@ class AM_SynR_Rotor_Iron(MachineComponent):
         return self._materials_dict["rotor_barrier_mat"]
     
 
+class Square_SynR_Rotor_Iron(MachineComponent):
+    @staticmethod
+    def required_dimensions():
+        return (
+            "r_ri",
+            "r_ro",
+            "d_r1",
+            "d_r2",
+            "w_b1",
+            "w_b2",
+        )
+    
+    @staticmethod
+    def required_parameters():
+        return ("p",)
+
+    @staticmethod
+    def required_materials():
+        return ("rotor_iron_mat",)
+    
+    @staticmethod
+    def required_materials():
+        return ("rotor_barrier_mat",)
+
+    @property
+    def r_ri(self):
+        return self._dimensions_dict["r_ri"]
+    
+    @property
+    def r_ro(self):
+        return self._dimensions_dict["r_ro"]
+    
+    @property
+    def d_r1(self):
+        return self._dimensions_dict["d_r1"]
+    
+    @property
+    def d_r2(self):
+        return self._dimensions_dict["d_r2"]
+    
+    @property
+    def w_b1(self):
+        return self._dimensions_dict["w_b1"]
+    
+    @property
+    def w_b2(self):
+        return self._dimensions_dict["w_b2"]
+    
+    @property
+    def lp(self):
+        return self._dimensions_dict["p"]
+
+    @property
+    def rotor_iron_mat(self):
+        return self._materials_dict["rotor_iron_mat"]
+    
+    @property
+    def rotor_barrier_mat(self):
+        return self._materials_dict["rotor_barrier_mat"]
+    
+
 class Vision_SynR_Rotor_Iron(MachineComponent):
     @staticmethod
     def required_dimensions():
