@@ -61,7 +61,7 @@ class SynR_Flux_Linkage_PostAnalyzer:
         print("path = ", state_out.conditions.path)
         print("study_name = ", state_out.conditions.study_name)
         print("I_hat = ", state_out.conditions.I_hat, " A")
-        print("rotor_angle = ", state_out.conditions.rotor_angle, " deg")
+        print("rotor_angle = ", state_out.conditions.rotor_angle[0], " deg")
         print("name_of_phases = ", state_out.conditions.name_of_phases)
         print("*************************************************************************\n")
 
