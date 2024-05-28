@@ -321,9 +321,9 @@ class BSPM_EM_Analyzer:
 
         # """ Set Parts names """
 
-        # app.GetModel(0).SetPartName(id_backiron, u"NotchedRotor")
-        # app.GetModel(0).SetPartName(id_shaft, u"Shaft")
-        # app.GetModel(0).SetPartName(id_statorCore, u"StatorCore")
+        app.GetModel(0).SetPartName(id_backiron, u"NotchedRotor")
+        app.GetModel(0).SetPartName(id_shaft, u"Shaft")
+        app.GetModel(0).SetPartName(id_statorCore, u"StatorCore")
 
         """ Add Part to Set for later references """
 
