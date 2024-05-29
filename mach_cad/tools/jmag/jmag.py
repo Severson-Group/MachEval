@@ -122,7 +122,6 @@ class JmagDesigner(
         self.geometry_editor = self.jd.CreateGeometryEditor(
             True
         )  # creates new geometry or edits the geometry.
-        self.geometry_editor.SetVersion(21.1)
         self.doc = self.geometry_editor.GetDocument()
         self.assembly = self.doc.GetAssembly()
         return file_found

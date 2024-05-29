@@ -322,7 +322,6 @@ class JMAG(object):  # < ToolBase & DrawerBase & MakerExtrudeBase & MakerRevolve
         # open JMAG Geometry Editor
         app.LaunchGeometryEditor()
         geomApp = app.CreateGeometryEditor()
-        geomApp.SetVersion(21.1)
         # geomApp.Show()
         geomApp.NewDocument()
         doc = geomApp.GetDocument()
