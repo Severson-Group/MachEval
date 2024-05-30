@@ -52,12 +52,16 @@ This analyzer requires several input parameters, all of which are displayed in t
    :widths: 70, 70, 30
    :header-rows: 1
 
+It should be noted that all of the inputs remain requirements regardless of the machine type. However, the Clarke transformation matrix
+will be different depending on the number of phases. An adaptation to this analyzer will be required for any machine type with more than one 
+current type (i.e. BSPM machine with torque and suspension currents). 
+
 Example Code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example code defining the flux linkage step is provided below. This code defines the analyzer problem class (input to the analyzer), 
-initializes the analyzer class with an explanation of the required configurations, and calls the post-analyzer class. It should be noted
-that the example below is used in conjunction with the ``flux_linkage`` analyzer:
+Example code defining the flux linkage step is provided below. This specific code uses SynR machine flux linkages and defines the analyzer 
+problem class (input to the analyzer), initializes the analyzer class with an explanation of the required configurations, and calls the 
+post-analyzer class. It should be noted that the example below is used in conjunction with the ``flux_linkage`` analyzer:
 
 .. code-block:: python
 

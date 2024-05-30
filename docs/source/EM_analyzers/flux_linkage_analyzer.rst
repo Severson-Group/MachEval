@@ -29,18 +29,32 @@ under synchronous operation. The following information document will provide a d
 Input from User
 *********************************
 
-This analyzer is used in the same way as the ``SynR_JMAG_2D_FEA_Analyzer``. The inputs and initialization are the exact same and are shown
-in the tables below:
+This analyzer is used in the same way as the ``JMAG_2D_FEA_Analyzers``. It should be noted that **each different machine type will need its
+own ProblemDefinition class**. The inputs and initialization for a synchronous reluctance (SynR) machine are the exact same as its FEA 
+analyzer and are shown in the tables below:
 
 .. csv-table:: `MachineDesign Input`
    :file: input_SynR_jmag2d_analyzer.csv
    :widths: 70, 70
    :header-rows: 1
 
-.. csv-table:: `SynR_flux_linkage_analyzer Initialization`
+.. csv-table:: `flux_linkage_analyzer Initialization`
    :file: init_SynR_jmag2d_analyzer.csv
    :widths: 70, 70
    :header-rows: 1
+
+Contained in the ``machine`` and ``operating_point`` objects are the key inputs:
+1. Machine design
+2. Number of phases
+3. Name of phases
+4. Operating point objects
+
+These inputs allow the user to define the machine geometry and create it in JMAG 2D FEA. The total number of phases in the analyzer 
+dictate how many mutual inductance flux linkages result from the analyzer. For instance, a 6-phase machine will have a self-inductance
+term and 5 mutual inductance terms per phase, for a total of 36 flux linkages calculated. The names of each phase enable the analyzer 
+to separately excited each phase such that these self- and mutual inductances can be calculated. The objects contained in the machine 
+and operating point dictate any changes in the operating current level of the phases should flux linkages need to be calculated at a 
+lower or higher current level.
 
 Example Code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,16 +136,20 @@ initializes the analyzer class with an explanation of the required configuration
 
     SynR_flux_linkage_step = AnalysisStep(SynR_EM_ProblemDefinition, SynR_flux_linkage_analysis, SynR_Flux_Linkage_PostAnalyzer)
 
+This code uses an ``example_machine`` object where the machine design, phases, and operating point are defined. The example machine 
+defines a rated current level for the machine phases and the operating point dictates at which percentage of the rated current the 
+machine is being tested at. For the purposes of a the 3-phase, synchronous reluctance example, the machine and operating point dictate 
+the same current level for each phase. However, for the BSPM machine, torque and suspension currents are independent of one another.
 It should be noted that this code should be contained as an analysis step in the main folder of the eMach repository. It must be contained 
 within the same folder as the code below in order for the code below to run.
 
 Output to User
 **********************************
 
-The ``SynR_flux_linkage_analyzer`` returns a directory holding the results obtained from the transient analysis of the machine. The elements 
+The ``flux_linkage_analyzer`` returns a directory holding the results obtained from the transient analysis of the machine. The elements 
 of this dictionary and their descriptions are provided below:
 
-.. csv-table:: `SynR_flux_linkage_analyzer Output`
+.. csv-table:: `flux_linkage_analyzer Output`
    :file: output_flux_linkage_analyzer.csv
    :widths: 70, 70
    :header-rows: 1
