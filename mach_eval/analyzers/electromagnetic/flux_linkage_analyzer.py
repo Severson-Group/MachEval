@@ -109,7 +109,7 @@ class Flux_Linkage_Analyzer:
         model.SetName(self.project_name)
         model.SetDescription(self.show(self.project_name, toString=True))
 
-        valid_design = self.pre_process(model)
+        valid_design = self.pre_process(app, model)
 
         if not valid_design:
             raise InvalidDesign
@@ -394,7 +394,7 @@ class Flux_Linkage_Analyzer:
                 "%s = %s" % item for item in tuple_list
             )
 
-    def pre_process(self, model):
+    def pre_process(self, app, model):
         # pre-process : you can select part by coordinate!
         """Group"""
 
@@ -417,6 +417,12 @@ class Flux_Linkage_Analyzer:
         id_shaft = part_ID_list[-1]   
 
         group("Coils", partIDRange_Coil)
+
+                # """ Set Parts names """
+
+        app.GetModel(0).SetPartName(id_rotorCore, u"RotorCore")
+        app.GetModel(0).SetPartName(id_shaft, u"Shaft")
+        app.GetModel(0).SetPartName(id_statorCore, u"StatorCore")
 
         """ Add Part to Set for later references """
 
