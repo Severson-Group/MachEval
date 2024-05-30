@@ -312,7 +312,7 @@ class BSPM_EM_Analyzer:
         id_shaft = part_ID_list[1]
         partIDRange_Magnet = part_ID_list[2 : int(2 + self.machine_variant.p * 2)]
         # id_sleeve = part_ID_list[int(2 + self.machine_variant.p * 2)]
-        id_statorCore = part_ID_list[int(2 + self.machine_variant.p * 2) + 1]
+        id_statorCore = part_ID_list[int(2 + self.machine_variant.p * 2)]
         partIDRange_Coil = part_ID_list[
             int(1 + self.machine_variant.p * 2)
             + 2 : int(2 + self.machine_variant.p * 2)
@@ -324,6 +324,12 @@ class BSPM_EM_Analyzer:
 
         group("Magnet", partIDRange_Magnet)
         group("Coils", partIDRange_Coil)
+
+        # """ Set Parts names """
+
+        app.GetModel(0).SetPartName(id_backiron, u"NotchedRotor")
+        app.GetModel(0).SetPartName(id_shaft, u"Shaft")
+        app.GetModel(0).SetPartName(id_statorCore, u"StatorCore")
 
         """ Add Part to Set for later references """
 
