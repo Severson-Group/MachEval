@@ -146,6 +146,7 @@ initializes the analyzer class with an explanation of the required configuration
         jmag_scheduler=False,
         jmag_visible=True,
         scale_axial_length = True,
+        jmag_version=None,
     )
 
     SynR_inductance_analysis = SynR_inductance.SynR_Inductance_Analyzer(configuration)

@@ -45,6 +45,7 @@ jmag_config = JMAG_2D_Config(
     num_cpus=4,
     jmag_scheduler=False,
     jmag_visible=False,
+    jmag_version="21.1",
 )
 em_analysis = em.BSPM_EM_Analyzer(jmag_config)
 # define AnalysysStep for EM evaluation

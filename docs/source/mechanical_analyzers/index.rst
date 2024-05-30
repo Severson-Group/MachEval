@@ -16,3 +16,4 @@ This page contains links to analyzers in eMach which aid in evaluating the mecha
     SPM Rotor Structural <SPM_structural_analyzer>
     SPM Sleeve <SPM_sleeve_analyzer>
     SPM Rotor Speed <SPM_rotor_speed_limit_analyzer>
+    Rotor Critical Speed <rotor_critical_speed_analyzer>

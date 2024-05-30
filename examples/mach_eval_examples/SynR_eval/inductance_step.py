@@ -44,6 +44,7 @@ configuration = SynR_EM_Config(
     jmag_visible=True,
     non_zero_end_ring_res = False,
     scale_axial_length = True,
+    jmag_version="21.1",
 )
 
 SynR_inductance_analysis = SynR_inductance.SynR_Inductance_Analyzer(configuration)

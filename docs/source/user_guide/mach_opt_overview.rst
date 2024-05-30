@@ -27,7 +27,7 @@ DesignSpace
 DataHandler
 	Saves the design, evaluation results, and objective values so that optimization can be paused and resumed.
 
-Additional details of each of these objects can be found in the code documentation. An example optimization of a rectangle using the ``mach_opt`` module can be found :doc:`here </getting_started/tutorials/rectangle_tutorial/index>`.
+Additional details of each of these objects can be found in the code documentation. An example optimization of a rectangle using the ``mach_opt`` module can be found :doc:`here <../getting_started/tutorials/rectangle_tutorial/index>`.
 
 Designer
 ****************

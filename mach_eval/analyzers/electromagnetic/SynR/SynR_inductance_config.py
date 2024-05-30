@@ -25,3 +25,4 @@ class SynR_Inductance_Config:
         self.jmag_scheduler = kwargs["jmag_scheduler"] # True if it is desired to schedule jobs instead of solving immediately
         self.jmag_visible = kwargs["jmag_visible"] # JMAG application visible if true
         self.scale_axial_length = kwargs["scale_axial_length"] # True: scale axial length to get the required rated torque
+        self.jmag_version = kwargs["jmag_version"] # JMAG application version
