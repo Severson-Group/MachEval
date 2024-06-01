@@ -12,7 +12,7 @@ from mach_eval.analyzers.electromagnetic.inductance_analyzer import Inductance_P
 
 from mach_cad.tools import jmag as JMAG
 
-filepath = "C:/Users/filepath_of_FEA_file"
+filepath = "C:/Users/dante/Documents/github_repos/eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval"
 phasenames = ['U', 'V', 'W']
 ratedcurrent = 20
 
@@ -30,10 +30,9 @@ if not os.path.isdir(results_filepath):
     os.makedirs(results_filepath)
 
 project_name = "Machine_FluxLinkage_Project"
-jmag_csv_folder = results_filepath
 
-if not os.path.isdir(jmag_csv_folder):
-    os.makedirs(jmag_csv_folder)
+if not os.path.isdir(results_filepath):
+    os.makedirs(results_filepath)
 
 app = toolJmag.jd
 model = app.GetCurrentModel()
@@ -63,15 +62,13 @@ print("rotor_angle = ", rotor_angle[0], " deg")
 print("name_of_phases = ", name_of_phases)
 print("*************************************************************************\n")
 
-tic = clock_time()
 clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
 inductance_prob = Inductance_Problem(current_peak, csv_folder, study_name, rotor_angle, name_of_phases)
 inductance_analyzer = Inductance_Analyzer(clarke_transformation_matrix)
 data = inductance_analyzer.analyze(inductance_prob)
-toc = clock_time()
-print("Time spent on the inductance evaluation is %g min." % ((toc- tic)/60))
 
 rotor_angle = data["rotor_angle"]
+Labc = data["Labc"]
 Lalphabeta = data["Lalphabeta"]
 Ldq = data["Ldq"]
 L_d = np.mean(Ldq[:,0,0])
@@ -81,28 +78,39 @@ saliency_ratio = L_d/L_q
 fig1 = plt.figure()
 ax1 = plt.axes()
 fig1.add_axes(ax1)
-ax1.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
-ax1.plot(rotor_angle[0], Lalphabeta[:,0,1]*1000)
-ax1.plot(rotor_angle[0], Lalphabeta[:,1,0]*1000)
-ax1.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
-ax1.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
+ax1.plot(rotor_angle[0], Labc[0,0,:]*1000)
+ax1.plot(rotor_angle[0], Labc[1,1,:]*1000)
+ax1.plot(rotor_angle[0], Labc[2,2,:]*1000)
 ax1.set_xlabel("Rotor Angle [deg]")
 ax1.set_ylabel("Inductance [mH]")
-ax1.set_title(r"$\alpha \beta \gamma$ Inductances")
-plt.legend([r"$L_{\alpha \alpha}$", r"$L_{\alpha \beta}$", r"$L_{\beta \alpha}$", r"$L_{\beta \beta}$", r"$L_{\gamma \gamma}$"], fontsize=12)
+ax1.set_title("abc Inductances")
+plt.legend(["$L_a$", "$L_b$", "$L_c$"], fontsize=12, loc='center right')
 plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
 plt.show()
 
 fig2 = plt.figure()
 ax2 = plt.axes()
 fig2.add_axes(ax2)
-plt.plot(rotor_angle[0], Ldq[:,0,0]*1000)
-plt.plot(rotor_angle[0], Ldq[:,1,1]*1000)
-plt.plot(rotor_angle[0], Ldq[:,2,2]*1000)
+ax2.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
+ax2.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
+ax2.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
 ax2.set_xlabel("Rotor Angle [deg]")
 ax2.set_ylabel("Inductance [mH]")
-ax2.set_title("dq0 Inductances")
-plt.legend(["$L_d$", "$L_q$", "$L_0$"], fontsize=12)
+ax2.set_title(r"$\alpha \beta \gamma$ Inductances")
+plt.legend([r"$L_{\alpha \alpha}$", r"$L_{\beta \beta}$", r"$L_{\gamma \gamma}$"], fontsize=12, loc='center right')
+plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+plt.show()
+
+fig3 = plt.figure()
+ax3 = plt.axes()
+fig3.add_axes(ax3)
+ax3.plot(rotor_angle[0], Ldq[:,0,0]*1000)
+ax3.plot(rotor_angle[0], Ldq[:,1,1]*1000)
+ax3.plot(rotor_angle[0], Ldq[:,2,2]*1000)
+ax3.set_xlabel("Rotor Angle [deg]")
+ax3.set_ylabel("Inductance [mH]")
+ax3.set_title("dq0 Inductances")
+plt.legend(["$L_d$", "$L_q$", "$L_0$"], fontsize=12, loc='center right')
 plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
 plt.show()
 

@@ -29,119 +29,89 @@ under synchronous operation. The following information document will provide a d
 Input from User
 *********************************
 
-This analyzer is used in the same way as the ``JMAG_2D_FEA_Analyzers``. It should be noted that **each different machine type will need its
-own ProblemDefinition class**. The inputs and initialization for a synchronous reluctance (SynR) machine are the exact same as its FEA 
-analyzer and are shown in the tables below:
+Users are utilizing a single Problem class to interface with this analyzer. This class requires the user to provide an instance of the 
+JMAG FEA application being used, a the model of the current project which needs to be in a file that is already open, a dedicated filepath
+for the results, the name of the phases, and the rated current of the machine. The specific requirements are summarized below:
 
-.. csv-table:: `MachineDesign Input`
-   :file: input_SynR_jmag2d_analyzer.csv
-   :widths: 70, 70
+.. csv-table:: `flux_linkage_analyzer Inputs`
+   :file: input_flux_linkage_analyzer.csv
+   :widths: 70, 70, 30
    :header-rows: 1
 
-.. csv-table:: `flux_linkage_analyzer Initialization`
-   :file: init_SynR_jmag2d_analyzer.csv
-   :widths: 70, 70
-   :header-rows: 1
+With regards to the model properties, there are several aspects of the JMAG FEA model that must be specific such that this analyzer works
+properly. Those properties are as follows
 
-Contained in the ``machine`` and ``operating_point`` objects are the key inputs:
-1. Machine design
-2. Number of phases
-3. Name of phases
-4. Operating point objects
+1. Must be transient model (can be 2D or 3D)
+2. The model must be named "Machine_FluxLinkage_Project"
+3. The study must be named "Machine_FluxLinkage_Study"
+4. The motion condition must be specified
+5. "FEM Coils" must be applied to the winding and linked to the circuit
+6. The mesh must already be generated
+7. The study properties must be fully defined, except for the csv output, which is defined by the analyzer
+8. The circuit must appear similar to the following image, where the current sources are titled "cs_PhaseName"
 
-These inputs allow the user to define the machine geometry and create it in JMAG 2D FEA. The total number of phases in the analyzer 
-dictate how many mutual inductance flux linkages result from the analyzer. For instance, a 6-phase machine will have a self-inductance
-term and 5 mutual inductance terms per phase, for a total of 36 flux linkages calculated. The names of each phase enable the analyzer 
-to separately excited each phase such that these self- and mutual inductances can be calculated. The objects contained in the machine 
-and operating point dictate any changes in the operating current level of the phases should flux linkages need to be calculated at a 
-lower or higher current level.
+.. figure:: ./Images/FluxLinkageExampleCircuit.png
+   :alt: Stator Diagram
+   :align: center
+   :width: 250 
 
 Example Code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example code defining the flux linkage step is provided below. This code defines the analyzer problem class (input to the analyzer), 
-initializes the analyzer class with an explanation of the required configurations, and calls the post-analyzer class.
+The following example demonstrates how to initialize instances of ``Flux_Linkage_Problem`` and ``Flux_Linkage_Analyzer``. An instance of 
+JMAG FEA is used in this example and is stored in the ``fluxlinkage_inductance_eval`` folder of the ``mach_eval_examples`` in ``eMach``. 
+An example file containing the example code is also found in that folder. The following code runs the flux linkage analyzer using the 
+aforementioned example file:
 
 .. code-block:: python
 
     import os
-    import copy
+    import sys
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from time import time as clock_time
 
-    from mach_eval import AnalysisStep, ProblemDefinition
-    from mach_eval.analyzers.electromagnetic import flux_linkage_analyzer as flux_linkage
-    from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer_config import Flux_Linkage_Config
+    os.chdir(os.path.dirname(__file__))
+    sys.path.append("../../../")
 
-    ############################ Define Flux Linkage Step ###########################
-    class SynR_EM_ProblemDefinition(ProblemDefinition):
-        """Converts a State into a problem"""
+    from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer import Flux_Linkage_Problem, Flux_Linkage_Analyzer
 
-        def __init__(self):
-            pass
+    from mach_cad.tools import jmag as JMAG
 
-        def get_problem(state):
+    filepath = "eMach_location/eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval"
+    phasenames = ['U', 'V', 'W']
+    ratedcurrent = 20
 
-            problem = flux_linkage.Flux_Linkage_Problem(
-                state.design.machine, state.design.settings)
-            return problem
+    ####################################################
+    # 01 Setting project name and output folder
+    ####################################################
 
-    # initialize em analyzer class with FEA configuration
-    configuration = Flux_Linkage_Config(
-        no_of_rev = 1,
-        no_of_steps = 72,
+    toolJmag = JMAG.JmagDesigner()
+    toolJmag.visible = True
+    toolJmag.open(filepath + "/Example_FluxLinkage_Machine.jproj")
 
-        mesh_size=3, # mm
-        mesh_size_rotor=1.5, # mm
-        airgap_mesh_radial_div=4,
-        airgap_mesh_circum_div=720,
-        mesh_air_region_scale=1.05,
+    # Create output folder
+    results_filepath = filepath + "/run_data/"
+    if not os.path.isdir(results_filepath):
+        os.makedirs(results_filepath)
 
-        only_table_results=False,
-        csv_results=("FEMCoilFlux"),
-        del_results_after_calc=False,
-        run_folder=os.path.dirname(__file__) + "/run_data/",
-        jmag_csv_folder=os.path.dirname(__file__) + "/run_data/jmag_csv/",
+    project_name = "Machine_FluxLinkage_Project"
 
-        max_nonlinear_iterations=50,
-        multiple_cpus=True,
-        num_cpus=4,
-        jmag_scheduler=False,
-        jmag_visible=True,
-        non_zero_end_ring_res = False,
-        scale_axial_length = True,
-        time_step = 0.0001
-    )
+    if not os.path.isdir(results_filepath):
+        os.makedirs(results_filepath)
 
-    class SynR_Flux_Linkage_PostAnalyzer:
-        
-        def get_next_state(results, in_state):
-            state_out = copy.deepcopy(in_state)
+    app = toolJmag.jd
+    model = app.GetCurrentModel()
 
-            state_out.conditions.path = results["csv_folder"]
-            state_out.conditions.study_name = results["study_name"]
-            state_out.conditions.I_hat = results["current_peak"]
-            state_out.conditions.rotor_angle = results["rotor_angle"]
-            state_out.conditions.name_of_phases = results["name_of_phases"]
+    # Pre-processing
+    model.SetName(project_name)
 
-            print("\n************************ FLUX LINKAGE RESULTS ************************")
-            print("path = ", state_out.conditions.path)
-            print("study_name = ", state_out.conditions.study_name)
-            print("I_hat = ", state_out.conditions.I_hat, " A")
-            print("rotor_angle = ", state_out.conditions.rotor_angle, " deg")
-            print("name_of_phases = ", state_out.conditions.name_of_phases)
-            print("*************************************************************************\n")
-
-            return state_out
-
-    SynR_flux_linkage_analysis = flux_linkage.Flux_Linkage_Analyzer(configuration)
-
-    SynR_flux_linkage_step = AnalysisStep(SynR_EM_ProblemDefinition, SynR_flux_linkage_analysis, SynR_Flux_Linkage_PostAnalyzer)
-
-This code uses an ``example_machine`` object where the machine design, phases, and operating point are defined. The example machine 
-defines a rated current level for the machine phases and the operating point dictates at which percentage of the rated current the 
-machine is being tested at. For the purposes of a the 3-phase, synchronous reluctance example, the machine and operating point dictate 
-the same current level for each phase. However, for the BSPM machine, torque and suspension currents are independent of one another.
-It should be noted that this code should be contained as an analysis step in the main folder of the eMach repository. It must be contained 
-within the same folder as the code below in order for the code below to run.
+This example code does the following:
+1. Initializes all of the required libraries and classes
+2. Defines the necessary inputs of the ``problem`` and ``analyzer`` classes
+3. Opens a fully-defined instance of JMAG
+4. Defines the output file location based
+5. Names project accordingly
 
 Output to User
 **********************************
@@ -158,32 +128,29 @@ The following code should be used to run the example analysis:
 
 .. code-block:: python
 
-    import os
-    import sys
-    from time import time as clock_time
+    ############################ Create Evaluator #####################
+    tic = clock_time()
+    flux_linkage_prob = Flux_Linkage_Problem(app, model, results_filepath, phasenames, ratedcurrent)
+    flux_linkage_analyzer = Flux_Linkage_Analyzer()
+    fea_data = flux_linkage_analyzer.analyze(flux_linkage_prob)
+    toc = clock_time()
+    print("Time spent on the flux linkage evaluation is %g min." % ((toc- tic)/60))
 
-    os.chdir(os.path.dirname(__file__))
+    csv_folder = fea_data["csv_folder"]
+    study_name = fea_data["study_name"]
+    current_peak = fea_data["current_peak"]
+    rotor_angle = fea_data["rotor_angle"]
+    name_of_phases = fea_data["name_of_phases"]
 
-    from mach_eval import (MachineEvaluator, MachineDesign)
-    from examples.mach_eval_examples.SynR_eval.SynR_flux_linkage_step import SynR_flux_linkage_step
-    from examples.mach_eval_examples.SynR_eval.example_SynR_machine import Example_SynR_Machine, Machine_Op_Pt
+    print("\n************************ FLUX LINKAGE RESULTS ************************")
+    print("path = ", csv_folder)
+    print("study_name = ", study_name)
+    print("I_hat = ", current_peak, " A")
+    print("rotor_angle = ", rotor_angle[0], " deg")
+    print("name_of_phases = ", name_of_phases)
+    print("*************************************************************************\n")
 
-    ############################ Create Evaluator ########################
-    SynR_evaluator = MachineEvaluator(
-        [
-            SynR_flux_linkage_step
-        ]
-    )
-
-    design_variant = MachineDesign(Example_SynR_Machine, Machine_Op_Pt)
-
-    results = SynR_evaluator.evaluate(design_variant)
-
-All example SynR evaluation scripts, including the one used for this analyzer, can be found in ``eMach\examples\mach_eval_examples\SynR_eval``,
-where the post-analyzer script uses FEA results and calculates machine performance metrics, including torque density, power density, efficiency,
-and torque ripple. This analyzer can be run by simply running the ``SynR_evaluator`` file in the aforementioned folder using the ``flux_linkage_step``.
-
-This example, contained in the aforementioned ``SynR_eval`` folder, should produce the following results:
+This example, contained in the aforementioned ``fluxlinkage_inductance_eval`` folder, should produce the following results:
 
 .. csv-table:: `flux_linkage_analyzer Results`
    :file: results_flux_linkage_analyzer.csv
@@ -191,4 +158,7 @@ This example, contained in the aforementioned ``SynR_eval`` folder, should produ
    :header-rows: 1
 
 One should expect the csv_folder location to differ depending on where the desired destination is. Within the ``resuls_folder`` there should be a 
-total of 6 csv files that contains the information requested in the ``_step`` file.
+total of 4 csv files that contains the flux linkage calculations for a 3 phase machine, there should be 7 csv files for a 6 phase machine, etc. Each 
+csv files should contain a total number of columns that equals the phase count of the machine. All of the code shown exists in the 
+``fluxlinkage_inductance_evaluator.py`` file in the ``eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval`` folder. This analyzer serves
+as a first step in conjunction with the  `Inductance Analyzer <https://emach.readthedocs.io/en/latest/EM_analyzers/inductance_analyzer.html>`_.

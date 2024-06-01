@@ -20,17 +20,16 @@ class Flux_Linkage_Problem:
         self.rated_current = rated_current
 
     
-    def add_em_study(self, app, model, dir_csv_output_folder, study_name):
+    def add_em_study(self, dir_csv_output_folder, study_name):
 
         # Initialize JMAG application
-        app.SetCurrentStudy(study_name)
-        study = model.GetStudy(study_name)
+        self.app.SetCurrentStudy(study_name)
+        study = self.model.GetStudy(study_name)
 
         # Study properties
-        study.GetStudyProperties().SetValue("ApproximateTransientAnalysis", 1) # psuedo steady state freq is for PWM drive to use
+        study.GetStudyProperties().SetValue("ApproximateTransientAnalysis", 1)
         study.GetStudyProperties().SetValue("OutputSteadyResultAs1stStep", 0)
         study.GetStudyProperties().SetValue("ConversionType", 0)
-        study.GetStudyProperties().SetValue("NonlinearMaxIteration", 50)
 
         # True: no mesh or field results are needed
         study.GetStudyProperties().SetValue("OnlyTableResults", False)
@@ -40,32 +39,34 @@ class Flux_Linkage_Problem:
         study.GetStudyProperties().SetValue("CsvOutputPath", dir_csv_output_folder)
         study.GetStudyProperties().SetValue("CsvResultTypes", "FEMCoilFlux")
 
+        self.app.SetCurrentStudy(study_name)
+
         return study
 
     
-    def zero_currents(self, I, freq, app, study):
+    def zero_currents(self, study):
         # Setting current values to zero to initialize circuit
 
         cs_name = []
         
         for i in range(0, len(self.phase_names)):
             cs_name.append("cs_" + self.phase_names[i]) 
-            f1 = app.FunctionFactory().Sin(0, freq, 90)
-            func = app.FunctionFactory().Composite()
+            f1 = self.app.FunctionFactory().Sin(0, 0.000001, 90)
+            func = self.app.FunctionFactory().Composite()
             func.AddFunction(f1)
             study.GetCircuit().GetComponent(cs_name[i]).SetFunction(func)
 
         return cs_name
 
 
-    def set_currents_sequence(self, I, freq, app, study, i, cs_names):
+    def set_currents_sequence(self, I, study, i, cs_names):
         
         # Setting current values of single current source
         if i == 0:
             pass
         else:
-            func = app.FunctionFactory().Composite()
-            f1 = app.FunctionFactory().Sin(I, freq, 90)
+            func = self.app.FunctionFactory().Composite()
+            f1 = self.app.FunctionFactory().Sin(I, 0.000001, 90)
             func.AddFunction(f1)
             study.GetCircuit().GetComponent(cs_names[i-1]).SetFunction(func)
 
@@ -76,6 +77,9 @@ class Flux_Linkage_Problem:
         study.RunAllCases()
         msg = "Time spent on %s is %g s." % (study.GetName(), clock_time() - toc)
         print(msg)
+
+        self.app.SetCurrentStudy(0)
+        self.app.GetModel(0).GetStudy(0).DeleteResult()
 
 
 class Flux_Linkage_Analyzer:
@@ -103,14 +107,13 @@ class Flux_Linkage_Analyzer:
         for i in range(len(self.phase_names)+1):
 
             # Create transient study with two time step sections
-            study = problem.add_em_study(self.app, self.model, self.results_filepath, self.study_name)
-            self.app.SetCurrentStudy(self.study_name)
+            study = problem.add_em_study(self.results_filepath, self.study_name)
 
             # Zero all Currents
-            self.cs_names = problem.zero_currents(self.rated_current, 0.00001, self.app, study)
+            self.cs_names = problem.zero_currents(study)
 
             # Set current phase excitation
-            problem.set_currents_sequence(self.rated_current, 0.00001, self.app, study, i, self.cs_names)
+            problem.set_currents_sequence(self.rated_current, study, i, self.cs_names)
 
             ################################################################
             # 03. Run electromagnetic studies
@@ -131,11 +134,6 @@ class Flux_Linkage_Analyzer:
                 else:
                     os.rename(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
                             self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
-            
-            self.app.SetCurrentStudy(0)
-            self.app.GetModel(0).GetStudy(0).DeleteResult()
-
-        self.app.Quit()
         
         ####################################################
         # 04. Extract Results

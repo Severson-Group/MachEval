@@ -64,6 +64,7 @@ class Inductance_Analyzer:
                 L_abc[col][row] = (flux_linkages[col][row] - flux_linkages_zero[col][row])/I_hat
 
         L_abc = np.array(L_abc)
+
         L_alpha_beta = []
         for i in range(len(L_abc[0][0])):
             L_alpha_beta.append([])

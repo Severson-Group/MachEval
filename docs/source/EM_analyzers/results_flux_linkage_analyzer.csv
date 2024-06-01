@@ -1,6 +1,6 @@
 Result,Value,Unit
-results_folder,/eMach/examples/mach_eval_examples/SynR_eval/run_data/jmag_csv/,
-study_name,Example_SynR_Machine_Ind_SynR,
+results_folder,eMach_location/eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval/run_data/,
+study_name,Machine_FluxLinkage_Study,
 I_hat,20,A
 rotor_angle,0 to 360 at 5 deg intervals,deg
 name_of_phases,"['U','V','W']",

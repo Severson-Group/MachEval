@@ -1,4 +1,5 @@
 Output,Description
 rotor_angle,array of rotor angles
+L_a_b_c,3D array of a-b-c inductances
 L_alpha_beta,3D array of alpha-beta inductances
 L_d_q,3D array of d-q inductances

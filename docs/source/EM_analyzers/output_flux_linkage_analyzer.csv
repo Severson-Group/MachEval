@@ -1,6 +1,6 @@
 Output,Description
-results_folder,folder where csv outputs are stored
+csv_folder,folder where csv outputs are stored
 study_name,name of study
-I_hat,peak current in A
+current_peak,peak current in A
 rotor_angle,rotor angle array in deg
 name_of_phases,name of each machine phase

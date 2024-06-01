@@ -59,89 +59,21 @@ current type (i.e. BSPM machine with torque and suspension currents).
 Example Code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example code defining the flux linkage step is provided below. This specific code uses SynR machine flux linkages and defines the analyzer 
-problem class (input to the analyzer), initializes the analyzer class with an explanation of the required configurations, and calls the 
-post-analyzer class. It should be noted that the example below is used in conjunction with the ``flux_linkage`` analyzer:
+The following example demonstrates how to initialize instances of ``Inductance_Problem`` and ``Inductance_Analyzer``. An example file containing 
+the example code is stored in the ``fluxlinkage_inductance_eval`` folder of the ``mach_eval_examples`` in ``eMach``. The following code runs the 
+inductance analyzer aforementioned example file, which requires the use of the `Flux Linkage Analyzer <https://emach.readthedocs.io/en/latest/EM_analyzers/flux_linkage_analyzer.html>`_:
 
 .. code-block:: python
 
-    import os
-    import sys
-    import copy
+    from mach_eval.analyzers.electromagnetic.inductance_analyzer import Inductance_Problem, Inductance_Analyzer
 
-    from mach_eval import AnalysisStep, ProblemDefinition
-    from mach_eval.analyzers.electromagnetic import inductance_analyzer as inductance
-
-    ############################ Define Inductance Step ###########################
-    class SynR_Ind_ProblemDefinition(ProblemDefinition):
-        """Converts a State into a problem"""
-
-        def __init__(self):
-            pass
-
-        def get_problem(state):
-
-            problem = inductance.Inductance_Problem(
-                state.conditions.I_hat, 
-                state.conditions.path, 
-                state.conditions.study_name, 
-                state.conditions.rotor_angle, 
-                state.conditions.name_of_phases)
-            return problem
+    csv_folder = fea_data["csv_folder"]
+    study_name = fea_data["study_name"]
+    current_peak = fea_data["current_peak"]
+    rotor_angle = fea_data["rotor_angle"]
+    name_of_phases = fea_data["name_of_phases"]
 
     clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
-
-    class SynR_Inductance_PostAnalyzer:
-        
-        def get_next_state(results, in_state):
-            state_out = copy.deepcopy(in_state)
-
-            state_out.conditions.rotor_angle = results["rotor_angle"]
-            state_out.conditions.Lalphabeta = results["Lalphabeta"]
-            state_out.conditions.Ldq = results["Ldq"]
-            L_d = np.mean(state_out.conditions.Ldq[:,0,0])
-            L_q = np.mean(state_out.conditions.Ldq[:,1,1])
-            saliency_ratio = L_d/L_q
-
-            fig1 = plt.figure()
-            ax1 = plt.axes()
-            fig1.add_axes(ax1)
-            ax1.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Lalphabeta[:,0,0]*1000)
-            ax1.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Lalphabeta[:,0,1]*1000)
-            ax1.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Lalphabeta[:,1,0]*1000)
-            ax1.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Lalphabeta[:,1,1]*1000)
-            ax1.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Lalphabeta[:,2,2]*1000)
-            ax1.set_xlabel("Rotor Angle [deg]")
-            ax1.set_ylabel("Inductance [mH]")
-            ax1.set_title(r"$\alpha \beta \gamma$ Inductances")
-            plt.legend([r"$L_{\alpha \alpha}$", r"$L_{\alpha \beta}$", r"$L_{\beta \alpha}$", r"$L_{\beta \beta}$", r"$L_{\gamma \gamma}$"], fontsize=12)
-            plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
-            plt.show()
-
-            fig2 = plt.figure()
-            ax2 = plt.axes()
-            fig2.add_axes(ax2)
-            plt.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Ldq[:,0,0]*1000)
-            plt.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Ldq[:,1,1]*1000)
-            plt.plot(state_out.conditions.rotor_angle[0], state_out.conditions.Ldq[:,2,2]*1000)
-            ax2.set_xlabel("Rotor Angle [deg]")
-            ax2.set_ylabel("Inductance [mH]")
-            ax2.set_title("dq0 Inductances")
-            plt.legend(["$L_d$", "$L_q$", "$L_0$"], fontsize=12)
-            plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
-            plt.show()
-
-            print("\n************************ INDUCTANCE RESULTS ************************")
-            print("Ld = ", L_d*1000, " mH")
-            print("Lq = ", L_q*1000, " mH")
-            print("Saliency Ratio = ", saliency_ratio)
-            print("*************************************************************************\n")
-
-            return state_out
-
-    SynR_inductance_analysis = inductance.Inductance_Analyzer(clarke_transformation_matrix)
-
-    SynR_inductance_step = AnalysisStep(SynR_Ind_ProblemDefinition, SynR_inductance_analysis, SynR_Inductance_PostAnalyzer)
 
 It should be noted that this code should be contained as an analysis step in the main folder of the eMach repository. It must be contained 
 within the same folder as the code below in order for the code below to run.
@@ -149,7 +81,7 @@ within the same folder as the code below in order for the code below to run.
 Output to User
 **********************************
 
-The ``flux_linkage_analyzer`` returns a directory holding the results obtained from the transient analysis of the machine. The elements 
+The ``inductance_analyzer`` returns a directory holding the results obtained from the transient analysis of the machine. The elements 
 of this dictionary and their descriptions are provided below:
 
 .. csv-table:: `inductance_analyzer Output`
@@ -161,39 +93,69 @@ The following code should be used to run the example analysis:
 
 .. code-block:: python
 
-    import os
-    import sys
-    from time import time as clock_time
+    inductance_prob = Inductance_Problem(current_peak, csv_folder, study_name, rotor_angle, name_of_phases)
+    inductance_analyzer = Inductance_Analyzer(clarke_transformation_matrix)
+    data = inductance_analyzer.analyze(inductance_prob)
 
-    os.chdir(os.path.dirname(__file__))
-    sys.path.append("../../../")
+    rotor_angle = data["rotor_angle"]
+    Labc = data["Labc"]
+    Lalphabeta = data["Lalphabeta"]
+    Ldq = data["Ldq"]
+    L_d = np.mean(Ldq[:,0,0])
+    L_q = np.mean(Ldq[:,1,1])
+    saliency_ratio = L_d/L_q
 
-    from mach_eval import (MachineEvaluator, MachineDesign)
-    from SynR_flux_linkage_step import SynR_flux_linkage_step
-    from SynR_inductance_step import SynR_inductance_step
-    from example_SynR_machine import Example_SynR_Machine, Machine_Op_Pt
+    fig1 = plt.figure()
+    ax1 = plt.axes()
+    fig1.add_axes(ax1)
+    ax1.plot(rotor_angle[0], Labc[0,0,:]*1000)
+    ax1.plot(rotor_angle[0], Labc[1,1,:]*1000)
+    ax1.plot(rotor_angle[0], Labc[2,2,:]*1000)
+    ax1.set_xlabel("Rotor Angle [deg]")
+    ax1.set_ylabel("Inductance [mH]")
+    ax1.set_title("abc Inductances")
+    plt.legend(["$L_a$", "$L_b$", "$L_c$"], fontsize=12, loc='center right')
+    plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+    plt.show()
 
-    ############################ Create Evaluator #####################
-    SynR_evaluator = MachineEvaluator(
-        [
-            SynR_flux_linkage_step,
-            SynR_inductance_step
-        ]
-    )
+    fig2 = plt.figure()
+    ax2 = plt.axes()
+    fig2.add_axes(ax2)
+    ax2.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
+    ax2.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
+    ax2.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
+    ax2.set_xlabel("Rotor Angle [deg]")
+    ax2.set_ylabel("Inductance [mH]")
+    ax2.set_title(r"$\alpha \beta \gamma$ Inductances")
+    plt.legend([r"$L_{\alpha \alpha}$", r"$L_{\beta \beta}$", r"$L_{\gamma \gamma}$"], fontsize=12, loc='center right')
+    plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+    plt.show()
 
-    design_variant = MachineDesign(Example_SynR_Machine, Machine_Op_Pt)
+    fig3 = plt.figure()
+    ax3 = plt.axes()
+    fig3.add_axes(ax3)
+    ax3.plot(rotor_angle[0], Ldq[:,0,0]*1000)
+    ax3.plot(rotor_angle[0], Ldq[:,1,1]*1000)
+    ax3.plot(rotor_angle[0], Ldq[:,2,2]*1000)
+    ax3.set_xlabel("Rotor Angle [deg]")
+    ax3.set_ylabel("Inductance [mH]")
+    ax3.set_title("dq0 Inductances")
+    plt.legend(["$L_d$", "$L_q$", "$L_0$"], fontsize=12, loc='center right')
+    plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+    plt.show()
 
-    tic = clock_time()
-    results = SynR_evaluator.evaluate(design_variant)
-    toc = clock_time()
+    print("\n************************ INDUCTANCE RESULTS ************************")
+    print("Ld = ", L_d*1000, " mH")
+    print("Lq = ", L_q*1000, " mH")
+    print("Saliency Ratio = ", saliency_ratio)
+    print("*************************************************************************\n")
 
-    print("Time spent on SynR evaluation is %g min." % ((toc- tic)/60))
+This example, contained in the aforementioned ``fluxlinkage_inductance_eval`` folder, should produce the following results:
 
-All example SynR evaluation scripts, including the one used for this analyzer, can be found in ``eMach\examples\mach_eval_examples\SynR_eval``,
-where the post-analyzer script uses FEA results and calculates machine performance metrics, including torque density, power density, efficiency,
-and torque ripple. This analyzer can be run by simply running the ``SynR_evaluator`` file in the aforementioned folder using the ``inductance_step``.
-
-This example should produce the following results:
+.. figure:: ./Images/a_b_c_inductances.svg
+   :alt: a_b_c_inductances 
+   :align: center
+   :width: 500 
 
 .. figure:: ./Images/alpha_beta_inductances.svg
    :alt: alpha_beta_inductances
@@ -212,4 +174,6 @@ This example should produce the following results:
    :align: center
 
 It should be noted that the inductance values calculated will be dependent on the number of turns in the stator. The saliency ratio however will 
-remain independent of this.
+remain independent of this. All of the code shown exists in the ``fluxlinkage_inductance_evaluator.py`` file in the 
+``eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval`` folder. This analyzer serves as a second step in conjunction with the 
+`Flux Linkage Analyzer <https://emach.readthedocs.io/en/latest/EM_analyzers/flux_linkage_analyzer.html>`_.
