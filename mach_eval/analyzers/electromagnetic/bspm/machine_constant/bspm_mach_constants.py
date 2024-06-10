@@ -77,16 +77,16 @@ class BSPMMachineConstantAnalyzer(BSPM_EM_Analyzer):
     def __init__(
             self,
             configuration: JMAG_2D_Config,
-            Kf_Kt_step: int = 10,
+            Kf_Kt_case: int = 10,
             Kdelta_coords: list = [[x, y] for x in np.linspace(-0.3,0.3,3) 
                                    for y in np.linspace(-0.3,0.3,3)],
-            Kphi_step: int = 10,
+            Kphi_case: int = 10,
             ): 
         self.configuration = configuration
         super().__init__(self.configuration)
-        self.Kf_Kt_step = Kf_Kt_step
+        self.Kf_Kt_case = Kf_Kt_case
         self.Kdelta_coords = Kdelta_coords
-        self.Kphi_step = Kphi_step
+        self.Kphi_case = Kphi_case
 
     def __getstate__(self):
         """Magic method for pickling"""
@@ -269,7 +269,7 @@ class BSPMMachineConstantAnalyzer(BSPM_EM_Analyzer):
     
     @cached_property
     def Kphi_speed(self):
-        return np.linspace(0,self.machine_op_pt.speed,self.Kphi_step)
+        return np.linspace(0,self.machine_op_pt.speed,self.Kphi_case)
     
     @lru_cache
     def run_Kf_Kt_simulations(self)->Tuple[list, list, list, list]:
@@ -282,7 +282,7 @@ class BSPMMachineConstantAnalyzer(BSPM_EM_Analyzer):
 
         # define torque and suspension current for simulation
         Iq_list = np.linspace(
-            0,np.sqrt(2)*self.machine.Rated_current,self.Kf_Kt_step)
+            0,np.sqrt(2)*self.machine.Rated_current,self.Kf_Kt_case)
         Is_list = np.sqrt(2)*self.machine.Rated_current - Iq_list
 
         force_df_list = []
@@ -295,7 +295,7 @@ class BSPMMachineConstantAnalyzer(BSPM_EM_Analyzer):
 
             # duplicate initial study
             self.init_model.DuplicateStudyName(self.init_study_name,
-                                f"{self.init_study_name}_Kf_Kt_step{idx}",True)
+                                f"{self.init_study_name}_Kf_Kt_case{idx}",True)
             
             present_study = self.toolJd.GetCurrentStudy()
             

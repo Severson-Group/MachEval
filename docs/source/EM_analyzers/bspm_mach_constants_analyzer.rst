@@ -73,7 +73,6 @@ to ensure the modules can imported properly:
 .. code-block:: python
 
     import mach_eval.analyzers.electromagnetic.bspm.machine_constant.bspm_mach_constants as bmc
-    import mach_eval.analyzers.electromagnetic.bspm.machine_constant.bspm_mach_constants as bmc
     from mach_eval.machines.materials.electric_steels import Arnon5
     from mach_eval.machines.materials.jmag_library_magnets import N40H
     from mach_eval.machines.materials.miscellaneous_materials import (
@@ -87,7 +86,6 @@ to ensure the modules can imported properly:
     from mach_eval.machines.bspm.bspm_oper_pt import BSPM_Machine_Oper_Pt
     from mach_eval.analyzers.electromagnetic.bspm.jmag_2d_config import JMAG_2D_Config
     import os
-    import numpy as np
 
 Define and Create ``BSPM Machine`` Object
 ------------------------------------------
@@ -270,10 +268,10 @@ Use the following code to run the example analysis:
     # SOLVE BSPM MACHINE CONSTANTS PROBLEM
     #########################################################
     result = analyzer.analyze(problem)
-    print(result.Kf)
-    print(result.Kt)
-    print(result.Kdelta)
-    print(result.Kphi)
+    print(f"Kf = {result.Kf}")
+    print(f"Kt = {result.Kt}")
+    print(f"Kdelta = {result.Kdelta}")
+    print(f"Kphi = {result.Kphi}")
 
 .. note::
 
