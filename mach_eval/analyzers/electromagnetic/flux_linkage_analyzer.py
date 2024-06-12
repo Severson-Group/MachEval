@@ -15,7 +15,7 @@ class FluxLinkageJMAG_Problem:
         self.phase_names = phase_names
         self.rated_current = rated_current
     
-    def add_em_study(self, dir_csv_output_folder, study_name):
+    def add_em_study(self, study_name):
 
         self.app = self.toolJmag.jd
         self.model = self.app.GetCurrentModel()
@@ -37,7 +37,12 @@ class FluxLinkageJMAG_Problem:
         study.GetStudyProperties().SetValue("DirectSolverType", 1)
 
         # Set csv folder output
-        study.GetStudyProperties().SetValue("CsvOutputPath", dir_csv_output_folder)
+        self.results_filepath = os.path.dirname(__file__) + "/run_data/"
+        # Create output folder
+        if not os.path.isdir(self.results_filepath):
+            os.makedirs(self.results_filepath)
+
+        study.GetStudyProperties().SetValue("CsvOutputPath", self.results_filepath)
         study.GetStudyProperties().SetValue("CsvResultTypes", "FEMCoilFlux")
 
         self.app.SetCurrentStudy(study_name)
@@ -72,7 +77,7 @@ class FluxLinkageJMAG_Problem:
             study.GetCircuit().GetComponent(cs_names[i-1]).SetFunction(func)
 
 
-    def run_study(self, study, toc):
+    def run_study(self, study_name, study, i, toc):
             
         print("-----------------------Running JMAG...")
         study.RunAllCases()
@@ -81,6 +86,47 @@ class FluxLinkageJMAG_Problem:
 
         self.app.SetCurrentStudy(0)
         self.app.GetModel(0).GetStudy(0).DeleteResult()
+
+        if i == 0:
+            if os.path.isfile(self.results_filepath + study_name + "_flux_of_fem_coil_0.csv") is True:
+                os.replace(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
+                        self.results_filepath + study_name + "_flux_of_fem_coil_0.csv")
+            else:
+                os.rename(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
+                        self.results_filepath + study_name + "_flux_of_fem_coil_0.csv")
+        else:
+            if os.path.isfile(self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1]) is True:
+                os.replace(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
+                        self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
+            else:
+                os.rename(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
+                        self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
+                
+
+    def extract_results(self, study_name):
+
+        linkage_files = {}
+        linkages = []
+        for i in range(len(self.phase_names)+1):
+            if i == 0:
+                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_0.csv", skiprows=6)
+                linkages.append(linkage_files[i])
+            else:
+                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1], skiprows=6)
+                linkages.append(linkage_files[i])
+
+        zero_linkages = linkages[0].to_numpy() # change csv format to readable array
+        time = zero_linkages[:,0] # define x axis data as time
+        rotor_angle = 360*1*time/(max(time) - min(time)),
+        
+        fea_data = {
+                "current_peak": self.rated_current,
+                "rotor_angle": rotor_angle,
+                "linkages": linkages,
+                "name_of_phases": self.phase_names,
+            }
+
+        return fea_data
 
 
 class FluxLinkageJMAG_Analyzer:
@@ -99,18 +145,11 @@ class FluxLinkageJMAG_Analyzer:
         ################################################################
 
         self.study_name = "Machine_FluxLinkage_Study"
-        self.results_filepath = os.path.dirname(__file__) + "/run_data/"
-        # Create output folder
-        if not os.path.isdir(self.results_filepath):
-            os.makedirs(self.results_filepath)
-
-        if not os.path.isdir(self.results_filepath):
-            os.makedirs(self.results_filepath)
 
         for i in range(len(problem.phase_names)+1):
 
             # Create transient study with two time step sections
-            study = problem.add_em_study(self.results_filepath, self.study_name)
+            study = problem.add_em_study(self.study_name)
 
             # Zero all Currents
             self.cs_names = problem.zero_currents(study)
@@ -121,53 +160,12 @@ class FluxLinkageJMAG_Analyzer:
             ################################################################
             # 03. Run electromagnetic studies
             ################################################################
-            problem.run_study(study, clock_time())
-
-            if i == 0:
-                if os.path.isfile(self.results_filepath + self.study_name + "_flux_of_fem_coil_0.csv") is True:
-                    os.replace(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
-                            self.results_filepath + self.study_name + "_flux_of_fem_coil_0.csv")
-                else:
-                    os.rename(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
-                            self.results_filepath + self.study_name + "_flux_of_fem_coil_0.csv")
-            else:
-                if os.path.isfile(self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1]) is True:
-                    os.replace(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
-                            self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1])
-                else:
-                    os.rename(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
-                            self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1])
+            problem.run_study(self.study_name, study, i, clock_time())
         
         ####################################################
         # 04. Extract Results
         ####################################################
 
-        fea_data = self.extract_results(problem, self.study_name) 
-
-        return fea_data
-
-
-    def extract_results(self, problem, study_name):
-
-        linkage_files = {}
-        linkages = []
-        for i in range(len(problem.phase_names)+1):
-            if i == 0:
-                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_0.csv", skiprows=6)
-                linkages.append(linkage_files[i])
-            else:
-                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1], skiprows=6)
-                linkages.append(linkage_files[i])
-
-        zero_linkages = linkages[0].to_numpy() # change csv format to readable array
-        time = zero_linkages[:,0] # define x axis data as time
-        rotor_angle = 360*1*time/(max(time) - min(time)),
-        
-        fea_data = {
-                "current_peak": problem.rated_current,
-                "rotor_angle": rotor_angle,
-                "linkages": linkages,
-                "name_of_phases": problem.phase_names,
-            }
+        fea_data = problem.extract_results(self.study_name) 
 
         return fea_data
