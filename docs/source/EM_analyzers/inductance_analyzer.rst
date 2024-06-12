@@ -65,15 +65,14 @@ inductance analyzer aforementioned example file, which requires the use of the `
 
 .. code-block:: python
 
-    from mach_eval.analyzers.electromagnetic.inductance_analyzer import Inductance_Problem, Inductance_Analyzer
+   from mach_eval.analyzers.electromagnetic.inductance_analyzer import Inductance_Problem, Inductance_Analyzer
 
-    csv_folder = fea_data["csv_folder"]
-    study_name = fea_data["study_name"]
-    current_peak = fea_data["current_peak"]
-    rotor_angle = fea_data["rotor_angle"]
-    name_of_phases = fea_data["name_of_phases"]
+   linkages = fea_data["linkages"]
+   current_peak = fea_data["current_peak"]
+   rotor_angle = fea_data["rotor_angle"]
+   name_of_phases = fea_data["name_of_phases"]
 
-    clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
+   clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
 
 It should be noted that this code should be contained as an analysis step in the main folder of the eMach repository. It must be contained 
 within the same folder as the code below in order for the code below to run.
@@ -93,62 +92,62 @@ The following code should be used to run the example analysis:
 
 .. code-block:: python
 
-    inductance_prob = Inductance_Problem(current_peak, csv_folder, study_name, rotor_angle, name_of_phases)
-    inductance_analyzer = Inductance_Analyzer(clarke_transformation_matrix)
-    data = inductance_analyzer.analyze(inductance_prob)
+   inductance_prob = Inductance_Problem(current_peak, linkages, rotor_angle, name_of_phases)
+   inductance_analyzer = Inductance_Analyzer(clarke_transformation_matrix)
+   data = inductance_analyzer.analyze(inductance_prob)
 
-    rotor_angle = data["rotor_angle"]
-    Labc = data["Labc"]
-    Lalphabeta = data["Lalphabeta"]
-    Ldq = data["Ldq"]
-    L_d = np.mean(Ldq[:,0,0])
-    L_q = np.mean(Ldq[:,1,1])
-    saliency_ratio = L_d/L_q
+   rotor_angle = data["rotor_angle"]
+   Labc = data["Labc"]
+   Lalphabeta = data["Lalphabeta"]
+   Ldq = data["Ldq"]
+   L_d = np.mean(Ldq[:,0,0])
+   L_q = np.mean(Ldq[:,1,1])
+   saliency_ratio = L_d/L_q
 
-    fig1 = plt.figure()
-    ax1 = plt.axes()
-    fig1.add_axes(ax1)
-    ax1.plot(rotor_angle[0], Labc[0,0,:]*1000)
-    ax1.plot(rotor_angle[0], Labc[1,1,:]*1000)
-    ax1.plot(rotor_angle[0], Labc[2,2,:]*1000)
-    ax1.set_xlabel("Rotor Angle [deg]")
-    ax1.set_ylabel("Inductance [mH]")
-    ax1.set_title("abc Inductances")
-    plt.legend(["$L_a$", "$L_b$", "$L_c$"], fontsize=12, loc='center right')
-    plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
-    plt.show()
+   fig1 = plt.figure()
+   ax1 = plt.axes()
+   fig1.add_axes(ax1)
+   ax1.plot(rotor_angle[0], Labc[0,0,:]*1000)
+   ax1.plot(rotor_angle[0], Labc[1,1,:]*1000)
+   ax1.plot(rotor_angle[0], Labc[2,2,:]*1000)
+   ax1.set_xlabel("Rotor Angle [deg]")
+   ax1.set_ylabel("Inductance [mH]")
+   ax1.set_title("abc Inductances")
+   plt.legend(["$L_a$", "$L_b$", "$L_c$"], fontsize=12, loc='center right')
+   plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+   plt.show()
 
-    fig2 = plt.figure()
-    ax2 = plt.axes()
-    fig2.add_axes(ax2)
-    ax2.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
-    ax2.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
-    ax2.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
-    ax2.set_xlabel("Rotor Angle [deg]")
-    ax2.set_ylabel("Inductance [mH]")
-    ax2.set_title(r"$\alpha \beta \gamma$ Inductances")
-    plt.legend([r"$L_{\alpha \alpha}$", r"$L_{\beta \beta}$", r"$L_{\gamma \gamma}$"], fontsize=12, loc='center right')
-    plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
-    plt.show()
+   fig2 = plt.figure()
+   ax2 = plt.axes()
+   fig2.add_axes(ax2)
+   ax2.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
+   ax2.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
+   ax2.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
+   ax2.set_xlabel("Rotor Angle [deg]")
+   ax2.set_ylabel("Inductance [mH]")
+   ax2.set_title(r"$\alpha \beta \gamma$ Inductances")
+   plt.legend([r"$L_{\alpha \alpha}$", r"$L_{\beta \beta}$", r"$L_{\gamma \gamma}$"], fontsize=12, loc='center right')
+   plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+   plt.show()
 
-    fig3 = plt.figure()
-    ax3 = plt.axes()
-    fig3.add_axes(ax3)
-    ax3.plot(rotor_angle[0], Ldq[:,0,0]*1000)
-    ax3.plot(rotor_angle[0], Ldq[:,1,1]*1000)
-    ax3.plot(rotor_angle[0], Ldq[:,2,2]*1000)
-    ax3.set_xlabel("Rotor Angle [deg]")
-    ax3.set_ylabel("Inductance [mH]")
-    ax3.set_title("dq0 Inductances")
-    plt.legend(["$L_d$", "$L_q$", "$L_0$"], fontsize=12, loc='center right')
-    plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
-    plt.show()
+   fig3 = plt.figure()
+   ax3 = plt.axes()
+   fig3.add_axes(ax3)
+   ax3.plot(rotor_angle[0], Ldq[:,0,0]*1000)
+   ax3.plot(rotor_angle[0], Ldq[:,1,1]*1000)
+   ax3.plot(rotor_angle[0], Ldq[:,2,2]*1000)
+   ax3.set_xlabel("Rotor Angle [deg]")
+   ax3.set_ylabel("Inductance [mH]")
+   ax3.set_title("dq0 Inductances")
+   plt.legend(["$L_d$", "$L_q$", "$L_0$"], fontsize=12, loc='center right')
+   plt.grid(True, linewidth=0.5, color="#A9A9A9", linestyle="-.")
+   plt.show()
 
-    print("\n************************ INDUCTANCE RESULTS ************************")
-    print("Ld = ", L_d*1000, " mH")
-    print("Lq = ", L_q*1000, " mH")
-    print("Saliency Ratio = ", saliency_ratio)
-    print("*************************************************************************\n")
+   print("\n************************ INDUCTANCE RESULTS ************************")
+   print("Ld = ", L_d*1000, " mH")
+   print("Lq = ", L_q*1000, " mH")
+   print("Saliency Ratio = ", saliency_ratio)
+   print("*************************************************************************\n")
 
 This example, contained in the aforementioned ``fluxlinkage_inductance_eval`` folder, should produce the following results:
 

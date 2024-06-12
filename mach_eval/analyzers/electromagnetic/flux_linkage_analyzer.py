@@ -2,25 +2,26 @@ import os
 import pandas as pd
 from time import time as clock_time
 
-class Flux_Linkage_Problem:
+class FluxLinkageJMAG_Problem:
     """Problem class for processing FEA flux linkages
     Attributes:
-        app: application required for FEA scripting
-        model: model required for FEA reference
-        results_filepath: local file path where results of FEA data are stored
+        toolJmag: JMAG tool required for FEA scripting
         phase_names: names of phases in machine
         rated_current: rated current of machine
     """
 
-    def __init__(self, app, model, results_filepath, phase_names, rated_current):
-        self.app = app
-        self.model = model
-        self.results_filepath = results_filepath
+    def __init__(self, toolJmag, phase_names, rated_current):
+        self.toolJmag = toolJmag
         self.phase_names = phase_names
         self.rated_current = rated_current
-
     
     def add_em_study(self, dir_csv_output_folder, study_name):
+
+        self.app = self.toolJmag.jd
+        self.model = self.app.GetCurrentModel()
+
+        # Pre-processing
+        self.model.SetName("Machine_FluxLinkage_Project")
 
         # Initialize JMAG application
         self.app.SetCurrentStudy(study_name)
@@ -82,7 +83,7 @@ class Flux_Linkage_Problem:
         self.app.GetModel(0).GetStudy(0).DeleteResult()
 
 
-class Flux_Linkage_Analyzer:
+class FluxLinkageJMAG_Analyzer:
     """Calcuates generates flux linkages from FEA
 
         Args:
@@ -92,19 +93,21 @@ class Flux_Linkage_Analyzer:
         """
     
     def analyze(self, problem):
-        self.app = problem.app
-        self.model = problem.model
-        self.phase_names = problem.phase_names
-        self.rated_current = problem.rated_current
-        self.results_filepath = problem.results_filepath
 
         ################################################################
         # 02. Create all operating points! One per phase + 0 current case
         ################################################################
 
         self.study_name = "Machine_FluxLinkage_Study"
+        self.results_filepath = os.path.dirname(__file__) + "/run_data/"
+        # Create output folder
+        if not os.path.isdir(self.results_filepath):
+            os.makedirs(self.results_filepath)
 
-        for i in range(len(self.phase_names)+1):
+        if not os.path.isdir(self.results_filepath):
+            os.makedirs(self.results_filepath)
+
+        for i in range(len(problem.phase_names)+1):
 
             # Create transient study with two time step sections
             study = problem.add_em_study(self.results_filepath, self.study_name)
@@ -113,7 +116,7 @@ class Flux_Linkage_Analyzer:
             self.cs_names = problem.zero_currents(study)
 
             # Set current phase excitation
-            problem.set_currents_sequence(self.rated_current, study, i, self.cs_names)
+            problem.set_currents_sequence(problem.rated_current, study, i, self.cs_names)
 
             ################################################################
             # 03. Run electromagnetic studies
@@ -128,35 +131,43 @@ class Flux_Linkage_Analyzer:
                     os.rename(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
                             self.results_filepath + self.study_name + "_flux_of_fem_coil_0.csv")
             else:
-                if os.path.isfile(self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1]) is True:
+                if os.path.isfile(self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1]) is True:
                     os.replace(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
-                            self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
+                            self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1])
                 else:
                     os.rename(self.results_filepath + self.study_name + "_flux_of_fem_coil.csv", 
-                            self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
+                            self.results_filepath + self.study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1])
         
         ####################################################
         # 04. Extract Results
         ####################################################
 
-        fea_data = self.extract_results(self.results_filepath, self.study_name) 
+        fea_data = self.extract_results(problem, self.study_name) 
 
         return fea_data
 
 
-    def extract_results(self, path, study_name):
+    def extract_results(self, problem, study_name):
 
-        zero_linkages = pd.read_csv(path + study_name + "_flux_of_fem_coil_0.csv", skiprows=6)
-        zero_linkages = zero_linkages.to_numpy() # change csv format to readable array
+        linkage_files = {}
+        linkages = []
+        for i in range(len(problem.phase_names)+1):
+            if i == 0:
+                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_0.csv", skiprows=6)
+                linkages.append(linkage_files[i])
+            else:
+                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % problem.phase_names[i-1], skiprows=6)
+                linkages.append(linkage_files[i])
+
+        zero_linkages = linkages[0].to_numpy() # change csv format to readable array
         time = zero_linkages[:,0] # define x axis data as time
         rotor_angle = 360*1*time/(max(time) - min(time)),
         
         fea_data = {
-                "current_peak": self.rated_current,
+                "current_peak": problem.rated_current,
                 "rotor_angle": rotor_angle,
-                "csv_folder": path,
-                "study_name": study_name,
-                "name_of_phases": self.phase_names,
+                "linkages": linkages,
+                "name_of_phases": problem.phase_names,
             }
 
         return fea_data

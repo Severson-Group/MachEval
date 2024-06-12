@@ -1,6 +1,4 @@
 Input,Description,Units
-app,instance of FEA application,
-model,name of model,
-results_folder,folder where csv outputs are stored,
+tool,FEA application tool,
 phase_names,list of names of phases,
 rated_current,rated machine current,A

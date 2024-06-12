@@ -1,7 +1,6 @@
 Arguments,Description,Units
 I_hat,peak current,A
-path,study path name,
-study_name,study name,
+linkages,array of flux linkages,
 rotor_angle,rotor angle array,deg
 name_of_phases,name of phases dictionary,
 clarke_trans_matrix,Clarke transformation matrix,

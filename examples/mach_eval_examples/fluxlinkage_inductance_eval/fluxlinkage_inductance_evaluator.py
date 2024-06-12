@@ -7,14 +7,14 @@ from time import time as clock_time
 os.chdir(os.path.dirname(__file__))
 sys.path.append("../../../")
 
-from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer import Flux_Linkage_Problem, Flux_Linkage_Analyzer
-from mach_eval.analyzers.electromagnetic.inductance_analyzer import Inductance_Problem, Inductance_Analyzer
+from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer import FluxLinkageJMAG_Problem, FluxLinkageJMAG_Analyzer
+from mach_eval.analyzers.electromagnetic.inductance_analyzer import InductanceProblem, InductanceAnalyzer
 
 from mach_cad.tools import jmag as JMAG
 
 filepath = "C:/Users/dante/Documents/github_repos/eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval"
 phasenames = ['U', 'V', 'W']
-ratedcurrent = 20
+rated_current = 20
 
 ####################################################
 # 01 Setting project name and output folder
@@ -24,47 +24,29 @@ toolJmag = JMAG.JmagDesigner()
 toolJmag.visible = True
 toolJmag.open(filepath + "/Example_FluxLinkage_Machine.jproj")
 
-# Create output folder
-results_filepath = filepath + "/run_data/"
-if not os.path.isdir(results_filepath):
-    os.makedirs(results_filepath)
-
-project_name = "Machine_FluxLinkage_Project"
-
-if not os.path.isdir(results_filepath):
-    os.makedirs(results_filepath)
-
-app = toolJmag.jd
-model = app.GetCurrentModel()
-
-# Pre-processing
-model.SetName(project_name)
-
 ############################ Create Evaluator #####################
 tic = clock_time()
-flux_linkage_prob = Flux_Linkage_Problem(app, model, results_filepath, phasenames, ratedcurrent)
-flux_linkage_analyzer = Flux_Linkage_Analyzer()
+flux_linkage_prob = FluxLinkageJMAG_Problem(toolJmag, phasenames, rated_current)
+flux_linkage_analyzer = FluxLinkageJMAG_Analyzer()
 fea_data = flux_linkage_analyzer.analyze(flux_linkage_prob)
 toc = clock_time()
 print("Time spent on the flux linkage evaluation is %g min." % ((toc- tic)/60))
 
-csv_folder = fea_data["csv_folder"]
-study_name = fea_data["study_name"]
+linkages = fea_data["linkages"]
 current_peak = fea_data["current_peak"]
 rotor_angle = fea_data["rotor_angle"]
 name_of_phases = fea_data["name_of_phases"]
 
 print("\n************************ FLUX LINKAGE RESULTS ************************")
-print("path = ", csv_folder)
-print("study_name = ", study_name)
+print("Linkages = ", linkages)
 print("I_hat = ", current_peak, " A")
 print("rotor_angle = ", rotor_angle[0], " deg")
 print("name_of_phases = ", name_of_phases)
 print("*************************************************************************\n")
 
 clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
-inductance_prob = Inductance_Problem(current_peak, csv_folder, study_name, rotor_angle, name_of_phases)
-inductance_analyzer = Inductance_Analyzer(clarke_transformation_matrix)
+inductance_prob = InductanceProblem(current_peak, linkages, rotor_angle, name_of_phases)
+inductance_analyzer = InductanceAnalyzer(clarke_transformation_matrix)
 data = inductance_analyzer.analyze(inductance_prob)
 
 rotor_angle = data["rotor_angle"]

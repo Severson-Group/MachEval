@@ -46,9 +46,8 @@ properly. Those properties are as follows
 3. The study must be named "Machine_FluxLinkage_Study"
 4. The motion condition must be specified
 5. "FEM Coils" must be applied to the winding and linked to the circuit
-6. The mesh must already be generated
-7. The study properties must be fully defined, except for the csv output, which is defined by the analyzer
-8. The circuit must appear similar to the following image, where the current sources are titled "cs_PhaseName"
+6. The study properties must be fully defined, except for the csv output, which is defined by the analyzer
+7. The circuit must appear similar to the following image, where the current sources are titled "cs_PhaseName"
 
 .. figure:: ./Images/FluxLinkageExampleCircuit.png
    :alt: Stator Diagram
@@ -74,13 +73,13 @@ aforementioned example file:
     os.chdir(os.path.dirname(__file__))
     sys.path.append("../../../")
 
-    from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer import Flux_Linkage_Problem, Flux_Linkage_Analyzer
+    from mach_eval.analyzers.electromagnetic.flux_linkage_analyzer import FluxLinkageJMAG_Problem, FluxLinkageJMAG_Analyzer
 
     from mach_cad.tools import jmag as JMAG
 
     filepath = "eMach_location/eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval"
     phasenames = ['U', 'V', 'W']
-    ratedcurrent = 20
+    rated_current = 20
 
     ####################################################
     # 01 Setting project name and output folder
@@ -89,22 +88,6 @@ aforementioned example file:
     toolJmag = JMAG.JmagDesigner()
     toolJmag.visible = True
     toolJmag.open(filepath + "/Example_FluxLinkage_Machine.jproj")
-
-    # Create output folder
-    results_filepath = filepath + "/run_data/"
-    if not os.path.isdir(results_filepath):
-        os.makedirs(results_filepath)
-
-    project_name = "Machine_FluxLinkage_Project"
-
-    if not os.path.isdir(results_filepath):
-        os.makedirs(results_filepath)
-
-    app = toolJmag.jd
-    model = app.GetCurrentModel()
-
-    # Pre-processing
-    model.SetName(project_name)
 
 This example code does the following:
 1. Initializes all of the required libraries and classes
@@ -130,21 +113,19 @@ The following code should be used to run the example analysis:
 
     ############################ Create Evaluator #####################
     tic = clock_time()
-    flux_linkage_prob = Flux_Linkage_Problem(app, model, results_filepath, phasenames, ratedcurrent)
-    flux_linkage_analyzer = Flux_Linkage_Analyzer()
+    flux_linkage_prob = FluxLinkageJMAG_Problem(toolJmag, phasenames, rated_current)
+    flux_linkage_analyzer = FluxLinkageJMAG_Analyzer()
     fea_data = flux_linkage_analyzer.analyze(flux_linkage_prob)
     toc = clock_time()
     print("Time spent on the flux linkage evaluation is %g min." % ((toc- tic)/60))
 
-    csv_folder = fea_data["csv_folder"]
-    study_name = fea_data["study_name"]
+    linkages = fea_data["linkages"]
     current_peak = fea_data["current_peak"]
     rotor_angle = fea_data["rotor_angle"]
     name_of_phases = fea_data["name_of_phases"]
 
     print("\n************************ FLUX LINKAGE RESULTS ************************")
-    print("path = ", csv_folder)
-    print("study_name = ", study_name)
+    print("Linkages = ", linkages)
     print("I_hat = ", current_peak, " A")
     print("rotor_angle = ", rotor_angle[0], " deg")
     print("name_of_phases = ", name_of_phases)
@@ -157,7 +138,7 @@ This example, contained in the aforementioned ``fluxlinkage_inductance_eval`` fo
    :widths: 70, 70, 30
    :header-rows: 1
 
-One should expect the csv_folder location to differ depending on where the desired destination is. Within the ``resuls_folder`` there should be a 
+One should expect the ``/run_data/`` working folder location to differ depending on where the workspace is. Within ``/run_data/`` there should be a 
 total of 4 csv files that contains the flux linkage calculations for a 3 phase machine, there should be 7 csv files for a 6 phase machine, etc. Each 
 csv files should contain a total number of columns that equals the phase count of the machine. All of the code shown exists in the 
 ``fluxlinkage_inductance_evaluator.py`` file in the ``eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval`` folder. This analyzer serves

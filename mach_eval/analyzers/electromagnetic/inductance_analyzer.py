@@ -2,25 +2,23 @@ import numpy as np
 import pandas as pd
 import numpy as np
 
-class Inductance_Problem:
+class InductanceProblem:
     """Problem class for inductance data processing
     Attributes:
-        I_hat: 
-        csv_folder: 
-        study_name: 
-        rotor_angle: 
-        name_of_phases: 
+        I_hat: peak current value for inductance calculations
+        linkages: arrays of flux linkages, should be (m+1) x m for m-phase machine
+        rotor_angle: array of rotor angle values for inductance calculations
+        name_of_phases: array of name of m-phases for machine
     """
 
-    def __init__(self, I_hat, csv_folder, study_name, rotor_angle, name_of_phases):
+    def __init__(self, I_hat, linkages, rotor_angle, name_of_phases):
         self.I_hat = I_hat
-        self.csv_folder = csv_folder 
-        self.study_name = study_name
+        self.linkages = linkages 
         self.rotor_angle = rotor_angle
         self.name_of_phases = name_of_phases
 
 
-class Inductance_Analyzer:
+class InductanceAnalyzer:
     def __init__(self, clarke_trans_matrix):
         self.clarke_trans_matrix = clarke_trans_matrix
 
@@ -32,11 +30,7 @@ class Inductance_Analyzer:
         Returns:
             data: dictionary of inductances and rotor angles
         """
-        path = problem.csv_folder
-        study_name = problem.study_name
-        I_hat = problem.I_hat
-        name_of_phases = problem.name_of_phases
-        rotor_angle = problem.rotor_angle
+
         L_abc = [] 
         flux_linkages = [] # make mxm list
         flux_linkages_files = {}
@@ -44,24 +38,24 @@ class Inductance_Analyzer:
         flux_linkages_zero = [] # make 1xm list
         flux_linkages_files_zero = {}
 
-        for col in range(len(name_of_phases)):
-            flux_linkages_files_zero[col] = pd.read_csv(path + study_name + "_flux_of_fem_coil_0.csv", skiprows=6)
-            flux_linkages_zero.append([])
-            L_zero.append([])
-            for row in range(len(name_of_phases)):
-                flux_linkages_zero[col].append(row)
-                L_zero[col].append(row)
-                flux_linkages_zero[col][row] = np.array(flux_linkages_files_zero[col]["coil_%s" % name_of_phases[row]])
-
-        for col in range(len(name_of_phases)):
-            flux_linkages_files[col] = pd.read_csv(path + study_name + "_flux_of_fem_coil_phase_%s.csv" % name_of_phases[col], skiprows=6)
-            flux_linkages.append([])
-            L_abc.append([])
-            for row in range(len(name_of_phases)):
-                flux_linkages[col].append(row)
-                L_abc[col].append(row)
-                flux_linkages[col][row] = np.array(flux_linkages_files[col]["coil_%s" % name_of_phases[row]])
-                L_abc[col][row] = (flux_linkages[col][row] - flux_linkages_zero[col][row])/I_hat
+        for col in range(len(problem.name_of_phases)+1):
+            if col == 0:
+                flux_linkages_files_zero[col] = problem.linkages[0]
+                flux_linkages_zero.append([])
+                L_zero.append([])
+                for row in range(len(problem.name_of_phases)):
+                    flux_linkages_zero[col].append(row)
+                    L_zero[col].append(row)
+                    flux_linkages_zero[col][row] = np.array(flux_linkages_files_zero[col]["coil_%s" % problem.name_of_phases[row]])
+            else:
+                flux_linkages_files[col-1] = problem.linkages[col]
+                flux_linkages.append([])
+                L_abc.append([])
+                for row in range(len(problem.name_of_phases)):
+                    flux_linkages[col-1].append(row)
+                    L_abc[col-1].append(row)
+                    flux_linkages[col-1][row] = np.array(flux_linkages_files[col-1]["coil_%s" % problem.name_of_phases[row]])
+                    L_abc[col-1][row] = (flux_linkages[col-1][row] - flux_linkages_zero[0][row])/problem.I_hat
 
         L_abc = np.array(L_abc)
 
@@ -76,7 +70,7 @@ class Inductance_Analyzer:
         L_dq = []
         for i in range(len(L_alpha_beta)):
             L_dq.append([])
-            theta = -rotor_angle[0][i]*np.pi/180
+            theta = -problem.rotor_angle[0][i]*np.pi/180
             park_trans_matrix = np.array([[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]])
             L_dq[i] = np.dot(park_trans_matrix,L_alpha_beta[i,:,:])
             L_dq[i] = np.dot(L_dq[i],np.linalg.inv(park_trans_matrix))
