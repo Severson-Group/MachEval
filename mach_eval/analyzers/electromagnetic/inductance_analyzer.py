@@ -54,7 +54,7 @@ class InductanceAnalyzer:
                 for row in range(len(problem.name_of_phases)):
                     flux_linkages[col-1].append(row)
                     L_abc[col-1].append(row)
-                    flux_linkages[col-1][row] = np.array(flux_linkages_files[col-1]["coil_%s" % problem.name_of_phases[row]])
+                    flux_linkages[col-1][row] = np.array(flux_linkages_files[col-1]["coil_%s.%s" % (problem.name_of_phases[row], str(col))])
                     L_abc[col-1][row] = (flux_linkages[col-1][row] - flux_linkages_zero[0][row])/problem.I_hat
 
         L_abc = np.array(L_abc)

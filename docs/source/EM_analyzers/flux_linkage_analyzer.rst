@@ -44,10 +44,11 @@ properly. Those properties are as follows
 1. Must be transient model (can be 2D or 3D)
 2. The model must be named "Machine_FluxLinkage_Project"
 3. The study must be named "Machine_FluxLinkage_Study"
-4. The motion condition must be specified
+4. The motion condition must be specified and MUST be rotating 1 full mechanincal revolution
 5. "FEM Coils" must be applied to the winding and linked to the circuit
 6. The study properties must be fully defined, except for the csv output, which is defined by the analyzer
 7. The circuit must appear similar to the following image, where the current sources are titled "cs_PhaseName"
+8. Under case control, the "cs_PhaseName" amplitudes MUST be the first cases AND listed in order of excitation
 
 .. figure:: ./Images/FluxLinkageExampleCircuit.png
    :alt: Stator Diagram

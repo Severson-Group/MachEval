@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 from time import time as clock_time
 
 class FluxLinkageJMAG_Problem:
@@ -27,21 +28,14 @@ class FluxLinkageJMAG_Problem:
         self.app.SetCurrentStudy(study_name)
         study = self.model.GetStudy(study_name)
 
-        # Study properties
-        study.GetStudyProperties().SetValue("ApproximateTransientAnalysis", 1)
-        study.GetStudyProperties().SetValue("OutputSteadyResultAs1stStep", 0)
-        study.GetStudyProperties().SetValue("ConversionType", 0)
-
-        # True: no mesh or field results are needed
-        study.GetStudyProperties().SetValue("OnlyTableResults", False)
-        study.GetStudyProperties().SetValue("DirectSolverType", 1)
-
         # Set csv folder output
         self.results_filepath = os.path.dirname(__file__) + "/run_data/"
+
         # Create output folder
         if not os.path.isdir(self.results_filepath):
             os.makedirs(self.results_filepath)
 
+        # Create csv output file loction
         study.GetStudyProperties().SetValue("CsvOutputPath", self.results_filepath)
         study.GetStudyProperties().SetValue("CsvResultTypes", "FEMCoilFlux")
 
@@ -50,75 +44,52 @@ class FluxLinkageJMAG_Problem:
         return study
 
     
-    def zero_currents(self, study):
-        # Setting current values to zero to initialize circuit
-
-        cs_name = []
+    def del_op_pts(self, study):
         
+        # Creating circuit function and zeroing all values
+        cs_name = []
         for i in range(0, len(self.phase_names)):
             cs_name.append("cs_" + self.phase_names[i]) 
             f1 = self.app.FunctionFactory().Sin(0, 0.000001, 90)
             func = self.app.FunctionFactory().Composite()
             func.AddFunction(f1)
             study.GetCircuit().GetComponent(cs_name[i]).SetFunction(func)
+            self.app.GetModel(0).GetStudy(0).GetDesignTable().AddParameterVariableName("cs_%s (CurrentSource): 1 (Composite Function): Amplitude" % self.phase_names[i])
+            self.app.GetModel(0).GetStudy(0).GetDesignTable().AddCase()
+            self.app.GetModel(0).GetStudy(0).GetDesignTable().SetValue(0, i, 0)
 
-        return cs_name
+    def new_op_pt(self, I_hat, i):
 
-
-    def set_currents_sequence(self, I, study, i, cs_names):
-        
-        # Setting current values of single current source
+        # Setting current values of single current source depending on phase excitation
         if i == 0:
             pass
         else:
-            func = self.app.FunctionFactory().Composite()
-            f1 = self.app.FunctionFactory().Sin(I, 0.000001, 90)
-            func.AddFunction(f1)
-            study.GetCircuit().GetComponent(cs_names[i-1]).SetFunction(func)
+            self.app.GetModel(0).GetStudy(0).GetDesignTable().SetValue(i, i-1, I_hat)
 
 
-    def run_study(self, study_name, study, i, toc):
-            
+    def run_all_studies(self, study, toc):
+
         print("-----------------------Running JMAG...")
         study.RunAllCases()
         msg = "Time spent on %s is %g s." % (study.GetName(), clock_time() - toc)
         print(msg)
-
-        self.app.SetCurrentStudy(0)
-        self.app.GetModel(0).GetStudy(0).DeleteResult()
-
-        if i == 0:
-            if os.path.isfile(self.results_filepath + study_name + "_flux_of_fem_coil_0.csv") is True:
-                os.replace(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
-                        self.results_filepath + study_name + "_flux_of_fem_coil_0.csv")
-            else:
-                os.rename(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
-                        self.results_filepath + study_name + "_flux_of_fem_coil_0.csv")
-        else:
-            if os.path.isfile(self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1]) is True:
-                os.replace(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
-                        self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
-            else:
-                os.rename(self.results_filepath + study_name + "_flux_of_fem_coil.csv", 
-                        self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1])
                 
 
     def extract_results(self, study_name):
 
+        # Read data from output file
         linkage_files = {}
         linkages = []
         for i in range(len(self.phase_names)+1):
-            if i == 0:
-                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_0.csv", skiprows=6)
-                linkages.append(linkage_files[i])
-            else:
-                linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil_phase_%s.csv" % self.phase_names[i-1], skiprows=6)
-                linkages.append(linkage_files[i])
+            linkage_files[i] = pd.read_csv(self.results_filepath + study_name + "_flux_of_fem_coil.csv", skiprows=6+len(self.phase_names), usecols=[0]+np.arange(len(self.phase_names)*i+1,len(self.phase_names)*i+len(self.phase_names)+1).tolist())
+            linkages.append(linkage_files[i])
 
-        zero_linkages = linkages[0].to_numpy() # change csv format to readable array
-        time = zero_linkages[:,0] # define x axis data as time
-        rotor_angle = 360*1*time/(max(time) - min(time)),
+        # Find rotor angle array from time data
+        zero_linkages = linkages[0].to_numpy()
+        time = zero_linkages[:,0]
+        rotor_angle = 360*time/(max(time) - min(time)),
         
+        # Write output data of analyzer
         fea_data = {
                 "current_peak": self.rated_current,
                 "rotor_angle": rotor_angle,
@@ -144,23 +115,22 @@ class FluxLinkageJMAG_Analyzer:
         # 02. Create all operating points! One per phase + 0 current case
         ################################################################
 
+        # Add necessary FEA definitions & parameters based on FEA tool
         self.study_name = "Machine_FluxLinkage_Study"
+        study = problem.add_em_study(self.study_name)
 
-        for i in range(len(problem.phase_names)+1):
+        # Zero all Currents
+        problem.del_op_pts(study)
 
-            # Create transient study with two time step sections
-            study = problem.add_em_study(self.study_name)
+        # Create cases for each operating point
+        for m in range(len(problem.phase_names)+1):
+            problem.new_op_pt(problem.rated_current, m)
 
-            # Zero all Currents
-            self.cs_names = problem.zero_currents(study)
+        ################################################################
+        # 03. Run electromagnetic studies
+        ################################################################
 
-            # Set current phase excitation
-            problem.set_currents_sequence(problem.rated_current, study, i, self.cs_names)
-
-            ################################################################
-            # 03. Run electromagnetic studies
-            ################################################################
-            problem.run_study(self.study_name, study, i, clock_time())
+        problem.run_all_studies(study, clock_time())
         
         ####################################################
         # 04. Extract Results
