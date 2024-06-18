@@ -1,0 +1,5 @@
+Output,Description
+linkages,group of flux linkage arrays
+phase_currents,vector of phase currents in A
+rotor_angle,rotor angle array in deg
+name_of_phases,name of each machine phase

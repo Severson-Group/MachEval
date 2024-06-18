@@ -1,0 +1,5 @@
+Result,Value,Unit
+linkages,Four 73x4 flux linkage arrays,
+phase_currents,"[[20, 0, 0], [0, 20, 0], [0, 0, 20]]",A
+rotor_angle,0 to 360 at 5 deg intervals,deg
+name_of_phases,"['U','V','W']",

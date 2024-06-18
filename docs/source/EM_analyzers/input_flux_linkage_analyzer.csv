@@ -1,0 +1,4 @@
+Input,Description,Units
+tool,FEA application tool,
+phase_names,list of names of phases,
+rated_current,rated machine current,A

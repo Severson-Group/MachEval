@@ -62,6 +62,10 @@ class Winding:
     @property
     def no_of_layers(self):
         return self._winding_dict["no_of_layers"]
+    
+    @property
+    def name_of_phases(self):
+        return self._winding_dict["name_of_phases"]
 
     @property
     def layer_phases(self):

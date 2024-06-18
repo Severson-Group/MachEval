@@ -62,6 +62,7 @@ SynR_materials = {
 
 SynR_winding = {
     "no_of_layers": 2,
+    "name_of_phases": ['U', 'V', 'W'],
     "layer_phases": [ ['U', 'W', 'V', 'U', 'W', 'V', 'U', 'W', 'V', 'U', 'W', 'V'],
                         ['W', 'V', 'U', 'W', 'V', 'U', 'W', 'V', 'U', 'W', 'V', 'U'] ],
     "layer_polarity": [ ['+', '-', '+', '-', '+', '-', '+', '-', '+', '-', '+', '-'],

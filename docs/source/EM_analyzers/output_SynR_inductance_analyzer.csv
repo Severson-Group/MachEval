@@ -1,4 +1,0 @@
-Output,Description
-Ld,Scalar value of d-axis inductance
-Lq,Scalar value of q-axis inductance
-saliency_ratio,Ratio between Ld and Lq

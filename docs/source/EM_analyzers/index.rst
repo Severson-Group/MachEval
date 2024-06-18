@@ -15,4 +15,5 @@ This section provides documentation for the electromagnetic analyzers supported 
     BSPM JMAG 2D FEA <bspm_jmag2d_analyzer>
     Winding Factors <winding_factors>
     SynR JMAG 2D FEA <SynR_jmag2d_analyzer>
-    Inductance/Saliency <inductance_analyzer>
+    Flux Linkage <flux_linkage_analyzer>
+    Inductance <inductance_analyzer>
