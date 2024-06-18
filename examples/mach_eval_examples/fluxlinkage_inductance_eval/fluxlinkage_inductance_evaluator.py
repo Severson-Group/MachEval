@@ -12,7 +12,8 @@ from mach_eval.analyzers.electromagnetic.inductance_analyzer import InductancePr
 
 from mach_cad.tools import jmag as JMAG
 
-filepath = "C:/Users/dante/Documents/github_repos/eMach/examples/mach_eval_examples/fluxlinkage_inductance_eval"
+script_dir = os.path.dirname(__file__)
+filename = os.path.join(script_dir, "Example_FluxLinkage_Machine.jproj")
 phasenames = ['U', 'V', 'W']
 rated_current = 20
 
@@ -22,30 +23,31 @@ rated_current = 20
 
 toolJmag = JMAG.JmagDesigner()
 toolJmag.visible = True
-toolJmag.open(filepath + "/Example_FluxLinkage_Machine.jproj")
+toolJmag.open(filename)
+toolJmag.save()
 
 ############################ Create Evaluator #####################
 tic = clock_time()
 flux_linkage_prob = FluxLinkageJMAG_Problem(toolJmag, phasenames, rated_current)
 flux_linkage_analyzer = FluxLinkageJMAG_Analyzer()
-fea_data = flux_linkage_analyzer.analyze(flux_linkage_prob)
+flux_linkages, currents = flux_linkage_analyzer.analyze(flux_linkage_prob)
 toc = clock_time()
 print("Time spent on the flux linkage evaluation is %g min." % ((toc- tic)/60))
 
-linkages = fea_data["linkages"]
-current_peak = fea_data["current_peak"]
-rotor_angle = fea_data["rotor_angle"]
-name_of_phases = fea_data["name_of_phases"]
+linkages = flux_linkages["linkages"]
+phase_currents = currents
+rotor_angle = flux_linkages["rotor_angle"][0]
+name_of_phases = flux_linkages["name_of_phases"]
 
 print("\n************************ FLUX LINKAGE RESULTS ************************")
-print("Linkages = ", linkages)
-print("I_hat = ", current_peak, " A")
-print("rotor_angle = ", rotor_angle[0], " deg")
+print("linkages = ", linkages)
+print("phase_currents = ", phase_currents, " A")
+print("rotor_angle = ", rotor_angle, " deg")
 print("name_of_phases = ", name_of_phases)
 print("*************************************************************************\n")
 
 clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
-inductance_prob = InductanceProblem(current_peak, linkages, rotor_angle, name_of_phases)
+inductance_prob = InductanceProblem(rated_current, linkages, rotor_angle, phasenames)
 inductance_analyzer = InductanceAnalyzer(clarke_transformation_matrix)
 data = inductance_analyzer.analyze(inductance_prob)
 
@@ -60,9 +62,9 @@ saliency_ratio = L_d/L_q
 fig1 = plt.figure()
 ax1 = plt.axes()
 fig1.add_axes(ax1)
-ax1.plot(rotor_angle[0], Labc[0,0,:]*1000)
-ax1.plot(rotor_angle[0], Labc[1,1,:]*1000)
-ax1.plot(rotor_angle[0], Labc[2,2,:]*1000)
+ax1.plot(rotor_angle, Labc[0,0,:]*1000)
+ax1.plot(rotor_angle, Labc[1,1,:]*1000)
+ax1.plot(rotor_angle, Labc[2,2,:]*1000)
 ax1.set_xlabel("Rotor Angle [deg]")
 ax1.set_ylabel("Inductance [mH]")
 ax1.set_title("abc Inductances")
@@ -73,9 +75,9 @@ plt.show()
 fig2 = plt.figure()
 ax2 = plt.axes()
 fig2.add_axes(ax2)
-ax2.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
-ax2.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
-ax2.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
+ax2.plot(rotor_angle, Lalphabeta[:,0,0]*1000)
+ax2.plot(rotor_angle, Lalphabeta[:,1,1]*1000)
+ax2.plot(rotor_angle, Lalphabeta[:,2,2]*1000)
 ax2.set_xlabel("Rotor Angle [deg]")
 ax2.set_ylabel("Inductance [mH]")
 ax2.set_title(r"$\alpha \beta \gamma$ Inductances")
@@ -86,9 +88,9 @@ plt.show()
 fig3 = plt.figure()
 ax3 = plt.axes()
 fig3.add_axes(ax3)
-ax3.plot(rotor_angle[0], Ldq[:,0,0]*1000)
-ax3.plot(rotor_angle[0], Ldq[:,1,1]*1000)
-ax3.plot(rotor_angle[0], Ldq[:,2,2]*1000)
+ax3.plot(rotor_angle, Ldq[:,0,0]*1000)
+ax3.plot(rotor_angle, Ldq[:,1,1]*1000)
+ax3.plot(rotor_angle, Ldq[:,2,2]*1000)
 ax3.set_xlabel("Rotor Angle [deg]")
 ax3.set_ylabel("Inductance [mH]")
 ax3.set_title("dq0 Inductances")

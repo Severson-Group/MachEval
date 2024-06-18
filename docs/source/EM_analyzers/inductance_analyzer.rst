@@ -67,10 +67,10 @@ inductance analyzer aforementioned example file, which requires the use of the `
 
    from mach_eval.analyzers.electromagnetic.inductance_analyzer import Inductance_Problem, Inductance_Analyzer
 
-   linkages = fea_data["linkages"]
-   current_peak = fea_data["current_peak"]
-   rotor_angle = fea_data["rotor_angle"]
-   name_of_phases = fea_data["name_of_phases"]
+   linkages = flux_linkages["linkages"]
+   phase_currents = currents
+   rotor_angle = flux_linkages["rotor_angle"][0]
+   name_of_phases = flux_linkages["name_of_phases"]
 
    clarke_transformation_matrix = 2/3*np.array([[1, -1/2, -1/2], [0, np.sqrt(3)/2, -np.sqrt(3)/2], [1/2, 1/2, 1/2]])
 
@@ -92,7 +92,7 @@ The following code should be used to run the example analysis:
 
 .. code-block:: python
 
-   inductance_prob = Inductance_Problem(current_peak, linkages, rotor_angle, name_of_phases)
+   inductance_prob = InductanceProblem(rated_current, linkages, rotor_angle, phasenames)
    inductance_analyzer = Inductance_Analyzer(clarke_transformation_matrix)
    data = inductance_analyzer.analyze(inductance_prob)
 
@@ -107,9 +107,9 @@ The following code should be used to run the example analysis:
    fig1 = plt.figure()
    ax1 = plt.axes()
    fig1.add_axes(ax1)
-   ax1.plot(rotor_angle[0], Labc[0,0,:]*1000)
-   ax1.plot(rotor_angle[0], Labc[1,1,:]*1000)
-   ax1.plot(rotor_angle[0], Labc[2,2,:]*1000)
+   ax1.plot(rotor_angle, Labc[0,0,:]*1000)
+   ax1.plot(rotor_angle, Labc[1,1,:]*1000)
+   ax1.plot(rotor_angle, Labc[2,2,:]*1000)
    ax1.set_xlabel("Rotor Angle [deg]")
    ax1.set_ylabel("Inductance [mH]")
    ax1.set_title("abc Inductances")
@@ -120,9 +120,9 @@ The following code should be used to run the example analysis:
    fig2 = plt.figure()
    ax2 = plt.axes()
    fig2.add_axes(ax2)
-   ax2.plot(rotor_angle[0], Lalphabeta[:,0,0]*1000)
-   ax2.plot(rotor_angle[0], Lalphabeta[:,1,1]*1000)
-   ax2.plot(rotor_angle[0], Lalphabeta[:,2,2]*1000)
+   ax2.plot(rotor_angle, Lalphabeta[:,0,0]*1000)
+   ax2.plot(rotor_angle, Lalphabeta[:,1,1]*1000)
+   ax2.plot(rotor_angle, Lalphabeta[:,2,2]*1000)
    ax2.set_xlabel("Rotor Angle [deg]")
    ax2.set_ylabel("Inductance [mH]")
    ax2.set_title(r"$\alpha \beta \gamma$ Inductances")
@@ -133,9 +133,9 @@ The following code should be used to run the example analysis:
    fig3 = plt.figure()
    ax3 = plt.axes()
    fig3.add_axes(ax3)
-   ax3.plot(rotor_angle[0], Ldq[:,0,0]*1000)
-   ax3.plot(rotor_angle[0], Ldq[:,1,1]*1000)
-   ax3.plot(rotor_angle[0], Ldq[:,2,2]*1000)
+   ax3.plot(rotor_angle, Ldq[:,0,0]*1000)
+   ax3.plot(rotor_angle, Ldq[:,1,1]*1000)
+   ax3.plot(rotor_angle, Ldq[:,2,2]*1000)
    ax3.set_xlabel("Rotor Angle [deg]")
    ax3.set_ylabel("Inductance [mH]")
    ax3.set_title("dq0 Inductances")

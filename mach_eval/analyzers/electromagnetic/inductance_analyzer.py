@@ -70,7 +70,7 @@ class InductanceAnalyzer:
         L_dq = []
         for i in range(len(L_alpha_beta)):
             L_dq.append([])
-            theta = -problem.rotor_angle[0][i]*np.pi/180
+            theta = -problem.rotor_angle[i]*np.pi/180
             park_trans_matrix = np.array([[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]])
             L_dq[i] = np.dot(park_trans_matrix,L_alpha_beta[i,:,:])
             L_dq[i] = np.dot(L_dq[i],np.linalg.inv(park_trans_matrix))

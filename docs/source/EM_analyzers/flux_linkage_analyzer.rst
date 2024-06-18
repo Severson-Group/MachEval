@@ -89,6 +89,7 @@ aforementioned example file:
     toolJmag = JMAG.JmagDesigner()
     toolJmag.visible = True
     toolJmag.open(filepath + "/Example_FluxLinkage_Machine.jproj")
+    toolJmag.save()
 
 This example code does the following:
 1. Initializes all of the required libraries and classes
@@ -116,19 +117,19 @@ The following code should be used to run the example analysis:
     tic = clock_time()
     flux_linkage_prob = FluxLinkageJMAG_Problem(toolJmag, phasenames, rated_current)
     flux_linkage_analyzer = FluxLinkageJMAG_Analyzer()
-    fea_data = flux_linkage_analyzer.analyze(flux_linkage_prob)
+    flux_linkages, currents = flux_linkage_analyzer.analyze(flux_linkage_prob)
     toc = clock_time()
     print("Time spent on the flux linkage evaluation is %g min." % ((toc- tic)/60))
 
-    linkages = fea_data["linkages"]
-    current_peak = fea_data["current_peak"]
-    rotor_angle = fea_data["rotor_angle"]
-    name_of_phases = fea_data["name_of_phases"]
+    linkages = flux_linkages["linkages"]
+    phase_currents = currents
+    rotor_angle = flux_linkages["rotor_angle"][0]
+    name_of_phases = flux_linkages["name_of_phases"]
 
     print("\n************************ FLUX LINKAGE RESULTS ************************")
     print("Linkages = ", linkages)
-    print("I_hat = ", current_peak, " A")
-    print("rotor_angle = ", rotor_angle[0], " deg")
+    print("phase_currents = ", phase_currents, " A")
+    print("rotor_angle = ", rotor_angle, " deg")
     print("name_of_phases = ", name_of_phases)
     print("*************************************************************************\n")
 
