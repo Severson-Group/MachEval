@@ -102,6 +102,9 @@ The purpose of the Machine Operating Point class is to define a the operating po
 2. Code comments on user input
     a. Provide short description of each operating point argument 
     b. Specify argument units if applicable
-3. Recommended practices
+Recommended practices
+*******************************************
+1. Provide machine specific definitions in machine class 
+2. Profide only operating point specific definitions in operating point class
     a. Provide machine specific definitions in machine class 
     b. Profide only operating point specific definitions in operating point class
