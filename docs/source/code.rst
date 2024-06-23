@@ -74,7 +74,7 @@ Machine Class
 
 The Machine class is where the machine definition is expected to occur, and it should also specify any machine variable desired in processing or post-processing. Aspects to consider:
 
-1. Required parameters
+1. Requirements to fully define machine
     a. Each machine must contain parameters (such as rotor, stator, winding, etc.) defined in the ``machine`` and ``radial_machine`` classes located in the  ``mach_eval/machines`` directory.
 2. Machine characteristic dictionaries
     a. Dictionaries must be initialized such that a ``machine`` or ``radial_machine`` is fully defined
