@@ -76,6 +76,8 @@ The Machine class is where the machine definition is expected to occur, and it s
 
 1. Requirements to fully define machine
     a. Each machine must contain parameters (such as rotor, stator, winding, etc.) defined in the ``machine`` and ``radial_machine`` classes located in the  ``mach_eval/machines`` directory.
+    b. Initialize dictionaries for ``dimensions``, ``parameters``, ``materials``, and ``winding`` to fully define a ``machine`` or ``radial_machine``.
+    c. Check defined dictonaries against machine requirements, and throw error if machine is not fully defined.
 2. Machine characteristic dictionaries
     a. Dictionaries must be initialized such that a ``machine`` or ``radial_machine`` is fully defined
     b. Required dictionaries are ``dimensions``, ``parameters``, ``materials``, and ``winding``
