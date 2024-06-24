@@ -78,23 +78,18 @@ The Machine class is where the machine definition is expected to occur, and it s
     a. Each machine must contain parameters (such as rotor, stator, winding, etc.) defined in the ``machine`` and ``radial_machine`` classes located in the  ``mach_eval/machines`` directory.
     b. Initialize dictionaries for ``dimensions``, ``parameters``, ``materials``, and ``winding`` to fully define a ``machine`` or ``radial_machine``.
     c. Check defined dictonaries against machine requirements, and throw error if machine is not fully defined.
-2. Machine characteristic dictionaries
-    a. Dictionaries must be initialized such that a ``machine`` or ``radial_machine`` is fully defined
-    b. Required dictionaries are ``dimensions``, ``parameters``, ``materials``, and ``winding``
-3. Checks
-    a. Required to validate if machine is fully defined
-    b. Check defined dictonaries against machine requirements
-    c. Throws error if machine is not fully defined
-4. Machine properties
-    a. Required for any machine variable desired in processing or post-processing
-5. Code comments on user input
+        * Required to validate if machine is fully defined
+        * Check defined dictonaries against machine requirements
+        * Throws error if machine is not fully defined
+    d. Machine properties are required for any machine variable desired in processing or post-processing
+2. Code comments on user input
     a. Provide short description of each argument for each dictionary 
     b. Specify argument units if applicable
 
 Machine Operating Point Class
 *******************************************
 
-The purpose of the Machine Operating Point class is to define a the operating point for the machine defined in the previous step. Aspects to consider:
+The purpose of the Machine Operating Point class is to define an operating point for the machine defined in the previous step. Aspects to consider:
 
 1. Requirements to fully define operating point
     a. Operating point definitions will differ with applications
@@ -102,6 +97,7 @@ The purpose of the Machine Operating Point class is to define a the operating po
 2. Code comments on user input
     a. Provide short description of each operating point argument 
     b. Specify argument units if applicable
+    
 Recommended practices
 *******************************************
 1. Provide machine specific definitions in machine class 
