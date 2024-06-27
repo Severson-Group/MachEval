@@ -35,7 +35,7 @@ class BSPMMachineConstantProblem:
     def __init__(
             self,
             machine:BSPM_Machine,
-            operating_point: BSPM_Machine_Oper_Pt,
+            nominal_op_pt: BSPM_Machine_Oper_Pt,
             solve_Kf: bool = True,
             solve_Kt: bool = True,
             solve_Kphi: bool = True,
@@ -45,7 +45,7 @@ class BSPMMachineConstantProblem:
 
         Args:
             machine (BSPM_Machine): instance of `BSPM_Machine`
-            operating_point (BSPM_Machine_Oper_Pt): instance of `BSPM_Machine_Oper_Pt`
+            nominial_op_pt (BSPM_Machine_Oper_Pt): instance of `BSPM_Machine_Oper_Pt`
             solve_Kf (bool, optional): solve force constant. Defaults to True.
             solve_Kt (bool, optional): solve torque constant. Defaults to True.
             solve_Kdelta (bool, optional): solve displacment constant. Defaults to True.
@@ -55,7 +55,7 @@ class BSPMMachineConstantProblem:
             BSPMMachineConstantProblem: instance of BSPMMachineConstantProblem
         """
         self.machine = machine
-        self.operating_point = operating_point
+        self.nominial_op_pt = nominal_op_pt
         self.solve_Kf = solve_Kf
         self.solve_Kt = solve_Kt
         self.solve_Kphi = solve_Kphi
@@ -68,7 +68,7 @@ class BSPMMachineConstantProblem:
                 'Invalid machine type, must be BSPM_Machine.'
                 )
         
-        if not isinstance(self.operating_point, BSPM_Machine_Oper_Pt):
+        if not isinstance(self.nominial_op_pt, BSPM_Machine_Oper_Pt):
             raise TypeError(
                 'Invalid settings type, must be BSPM_Machine_Oper_Pt.'
                 )
@@ -113,7 +113,7 @@ class BSPMMachineConstantAnalyzer(BSPM_EM_Analyzer):
         
         self.problem = problem
         self.machine = problem.machine
-        self.machine_op_pt = problem.operating_point
+        self.nominial_op_pt = problem.nominial_op_pt
         self._validate_attr()
 
         # Run initial analysis to build the model 
@@ -269,7 +269,7 @@ class BSPMMachineConstantAnalyzer(BSPM_EM_Analyzer):
     
     @cached_property
     def Kphi_speed(self):
-        return np.linspace(0,self.machine_op_pt.speed,self.Kphi_case)
+        return np.linspace(0,self.nominial_op_pt.speed,self.Kphi_case)
     
     @lru_cache
     def run_Kf_Kt_simulations(self)->Tuple[list, list, list, list]:
