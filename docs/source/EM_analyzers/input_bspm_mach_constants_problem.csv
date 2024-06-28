@@ -1,7 +1,7 @@
 Arguments, Type, Description
 machine, ``BSPM_machine``, instance of ``BSPM_machine``
-operating_point,``BSPM_Machine_Oper_Pt``, instance of ``BSPM_Machine_Oper_Pt``
-solve_Kf,bool (default - *True*), boolean input to check whether to solve Kf value or not 
-solve_Kt,bool (default - *True*),boolean input to check whether to solve Kt value or not 
-solve_Kphi,bool (default - *True*),boolean input to check whether to solve Kphi value or not 
-solve_Kdelta,bool (default - *True*),boolean input to check whether to solve Kdelta value or not 
+nominial_op_pt,``BSPM_Machine_Oper_Pt``, nominal operating point of BSPM Machine under evaluation
+Kf_op_pt, list (default - *None*), list containing instances of `BSPM_Machine_Oper_Pt` for Kf simulations
+Kt_op_pt, list (default - *None*), list containing instances of `BSPM_Machine_Oper_Pt` for Kt simulations
+Kphi_op_pt, list (default - *None*), list containing instances of `BSPM_Machine_Oper_Pt` for Kphi simulations
+Kdelta_coords, list (default - *None*),list of [x y] coordinates in mm to run Kdelta simulations

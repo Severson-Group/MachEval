@@ -1,5 +1,3 @@
 Arguments, Type, Description
 config, ``JMAG_2D_Config``," object of type JMAG_2D_Config describing time step and mesh setting, etc."
-Kf_Kt_step, int (default - *10*), number of steps for evaluating suspension force and torque constant
-Kdelta_coords, list (default - *see below*), list of coordinate points [x y] in mm
-Kphi_step, int (default - *10*), number of steps for evaluating back-EMF constant
+

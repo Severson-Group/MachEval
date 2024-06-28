@@ -6,7 +6,8 @@ This analyzer determines the machine constants (:math:`k_t, k_f, k_\delta,` and 
 Model Background
 ****************
 
-This analyzer utilizes scripts within eMach to generate ``BSPM_Machine`` and ``BSPM_Machine_Oper_Pt`` objects for performing a machine constant analysis.
+This analyzer utilizes scripts within eMach to generate ``BSPM_Machine`` and ``BSPM_Machine_Oper_Pt`` objects for performing machine constant analysis. 
+In each analysis, linear polynomials are fitted to torque (or force) data as the current (or displacement) varies in order to obtain the corresponding machine constant.
 
 Torque Contant :math:`k_t`
 ------------------------------------
@@ -26,8 +27,7 @@ The suspension force constant, :math:`k_f`, and displacement stiffness constant,
 
    \vec{F} = k_f \vec{i_s}+k_\delta \vec{\delta}
 
-where :math:`\delta` is the displacement of the rotor from the magnetic center, :math:`F_c` is the force created by the current, :math:`\vec{i_s}` is the suspension 
-current, :math:`k_f` is the force constant, and :math:`k_\delta` is the displacement stiffness constant.
+where :math:`\vec{i_s}` is the suspension current, and :math:`\delta` is the displacement of the rotor from the magnetic center.
 
 
 Back-EMF Constant :math:`k_\Phi`
@@ -38,7 +38,7 @@ The machine back-EMF constant :math:`k_\Phi` can be expressed using the followin
 
    \vec{v_m} = k_\Phi\omega
 
-where, :math:`\omega` is angular velocity in rad/s and :math:`\vec{v_m}` is the RMS value of the induced phase voltage.
+where, :math:`\omega` is angular velocity in rad/s and :math:`\vec{v_m}` is the peak value of the induced phase voltage.
 
 Input from User
 *********************************
@@ -56,14 +56,6 @@ for each are summarized below:
    :file: input_bspm_mach_constants_analyzer.csv
    :widths: 20, 20, 30
    :header-rows: 1
-
-The default value of ``Kdelta_coords`` is shown below:
-
-.. code-block:: python
-    
-    Kdelta_coords: list = [[x, y] for x in np.linspace(-0.3,0.3,3) 
-                            for y in np.linspace(-0.3,0.3,3)],
-
 
 Import Modules
 ------------------------------------
@@ -212,20 +204,20 @@ Users can paste the provided sample pf the JMAG configuration code to instantiat
         no_of_steps_per_rev_2TS=360,
         mesh_size=2e-3,
         magnet_mesh_size=1e-3,
-        airgap_mesh_radial_div=5,
+        airgap_mesh_radial_div=7,
         airgap_mesh_circum_div=720,
         mesh_air_region_scale=1.15,
         only_table_results=False,
-        csv_results=(r"Torque;Force;FEMCoilFlux;LineCurrent;TerminalVoltage;JouleLoss;TotalDisplacementAngle;"
-                    "JouleLoss_IronLoss;IronLoss_IronLoss;HysteresisLoss_IronLoss"),
+        csv_results=r"Torque;Force;FEMCoilFlux;LineCurrent;TerminalVoltage;JouleLoss;TotalDisplacementAngle;JouleLoss_IronLoss;IronLoss_IronLoss;HysteresisLoss_IronLoss",
         del_results_after_calc=False,
-        run_folder=os.path.abspath("") + "/run_data/",
-        jmag_csv_folder=os.path.abspath("") + "/run_data/JMAG_csv/",
+        run_folder=os.path.dirname(__file__) + "/run_data/",
+        jmag_csv_folder=os.path.dirname(__file__) + "/run_data/JMAG_csv/",
         max_nonlinear_iterations=50,
         multiple_cpus=True,
         num_cpus=4,
         jmag_scheduler=False,
-        jmag_visible=True,
+        jmag_visible=False,
+        jmag_version = '23',
     )
 
 .. note::
@@ -235,14 +227,75 @@ Users can paste the provided sample pf the JMAG configuration code to instantiat
 Define Problem and Analyzer Object
 ------------------------------------
 
-Use the following code to create the problem and analyzer object:
+Use the following code to define the problem and analyzer object:
 
 .. code-block:: python
 
     #########################################################
+    # DEFINE BSPM OPERATING POINTS
+    #########################################################
+
+    # List of BSPM operating points for Kf evaluation
+    Kf_op_pt = [
+        BSPM_Machine_Oper_Pt(
+            Id=0,
+            Iq=0,
+            Ix=0,
+            Iy=Is_pu,
+            speed=160000,
+            ambient_temp=25,
+            rotor_temp_rise=55,
+        )
+
+        for Is_pu in np.linspace(0,1,10)
+    ]
+
+    # List of BSPM operating points for Kt evaluation
+    Kt_op_pt = [
+        BSPM_Machine_Oper_Pt(
+            Id=0,
+            Iq=Iq_pu,
+            Ix=0,
+            Iy=0,
+            speed=160000,
+            ambient_temp=25,
+            rotor_temp_rise=55,
+        )
+        for Iq_pu in np.linspace(0,1,10)
+    ]
+
+    # List of BSPM operating points for Kphi evaluation
+    Kphi_op_pt = [
+        BSPM_Machine_Oper_Pt(
+            Id=0,
+            Iq=0,
+            Ix=0,
+            Iy=0,
+            speed=speed,
+            ambient_temp=25,
+            rotor_temp_rise=55,
+        )
+        for speed in np.linspace(0,160000,10)
+    ]
+
+    # List of coordinates for Kdelta evaluation
+    Kdelta_coords = [
+        [x, y] 
+        for x in np.linspace(-0.3,0.3,3) 
+        for y in np.linspace(-0.3,0.3,3)
+    ]
+
+    #########################################################
     # DEFINE BSPM MACHINE CONSTANTS PROBLEM
     #########################################################
-    problem = bmc.BSPMMachineConstantProblem(bp4,bp4_op_pt)
+    problem = BSPMMachineConstantProblem(
+        machine=bp4,
+        nominal_op_pt=bp4_op_pt,
+        Kf_op_pt,
+        Kt_op_pt,
+        Kphi_op_pt,
+        Kdelta_coords
+    )
 
     #########################################################
     # DEFINE BSPM MACHINE CONSTANTS ANALYZER
@@ -285,11 +338,11 @@ Running the example case returns the following:
 
 .. code-block:: python
 
-    1.8019710307171688
-    0.0203730830815381
-    6935.763575553156
-    0.00456017028983404
+    1.8052182451902197
+    0.01911529534112125
+    6935.763575553303
+    0.006449054670613704
 
-The results indicate that the example BSPM machine design has a suspension force constant of :math:`k_f = 1.802\;  [\frac{N}{A}]`, a torque constant of 
-:math:`k_t = 0.0204 \; [\frac{Nm}{A_{pk}}]`, a displacement stiffness constant of :math:`k_\delta = 6935.76\;  [\frac{N}{m}]`, and back-EMF constant of 
-:math:`k_\phi = 0.00456\;  [\frac{V_{rms}}{rad/s}]`.
+The results indicate that the example BSPM machine design has a suspension force constant of :math:`k_f = 1.805\;  [\frac{N}{A_{pk}}]`, a torque constant of 
+:math:`k_t = 0.0191 \; [\frac{Nm}{A_{pk}}]`, a displacement stiffness constant of :math:`k_\delta = 6935.76\;  [\frac{N}{m}]`, and back-EMF constant of 
+:math:`k_\phi = 0.00645\;  [\frac{V_{pk}}{rad/s}]`.
