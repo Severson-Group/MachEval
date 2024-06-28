@@ -27,7 +27,7 @@ The suspension force constant, :math:`k_f`, and displacement stiffness constant,
 
    \vec{F} = k_f \vec{i_s}+k_\delta \vec{\delta}
 
-where :math:`\vec{i_s}` is the suspension current, and :math:`\delta` is the displacement of the rotor from the magnetic center.
+where :math:`\vec{i_s}` is the suspension current, and :math:`\vec{\delta}` is the displacement of the rotor from the magnetic center.
 
 
 Back-EMF Constant :math:`k_\Phi`
