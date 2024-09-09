@@ -1,0 +1,3 @@
+[submodule "eMach"]
+	path = eMach
+	url = https://github.com/Severson-Group/eMach.git
