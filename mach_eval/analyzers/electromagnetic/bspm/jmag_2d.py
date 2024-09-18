@@ -750,10 +750,9 @@ class BSPM_EM_Analyzer:
         )
 
         study.SetMaterialByName(
-            "Shaft", self.machine_variant.shaft_mat["shaft_material"]
+            "Shaft", "Air"
         )
-        study.GetMaterial("Shaft").SetValue("Laminated", 0)
-        study.GetMaterial("Shaft").SetValue("EddyCurrentCalculation", 1)
+        study.GetMaterial("Air")
 
         study.SetMaterialByName("Coils", "Copper")
         study.GetMaterial("Coils").SetValue("UserConductivityType", 1)
