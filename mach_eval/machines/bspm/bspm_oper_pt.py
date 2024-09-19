@@ -13,9 +13,9 @@ class BSPM_Machine_Oper_Pt:
         Iq=0.95,
         Ix=0,
         Iy=0.05,
-        speed=150000,
-        ambient_temp=25,
-        rotor_temp_rise=55,
+        speed=5250,
+        ambient_temp=20,
+        rotor_temp_rise=0,
     ):
         """
         Args:
