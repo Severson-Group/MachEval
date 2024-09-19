@@ -547,7 +547,8 @@ class BSPM_EM_Analyzer:
         # Stator
         if True:
             cond = study.CreateCondition("Ironloss", "IronLossConStator")
-            cond.SetValue("RevolutionSpeed", "freq*60/%d" % self.machine_variant.p)
+            cond.SetValue("BasicFrequencyType", 2)
+            cond.SetValue("BasicFrequency", "freq")
             cond.ClearParts()
             sel = cond.GetSelection()
             EPS = 1e-2  # unit: mm
