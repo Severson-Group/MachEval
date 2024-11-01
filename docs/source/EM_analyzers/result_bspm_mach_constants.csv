@@ -1,0 +1,5 @@
+Attribute,Description,Units
+Kf, Suspension force constant, N/A_pk
+Kt, Torque constant, Nm/A_pk
+Kdelta, Displacement stiffness constant, N/m
+Kphi, Back-EMF constant , V_pk/rad/s

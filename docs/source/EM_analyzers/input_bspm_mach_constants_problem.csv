@@ -1,0 +1,7 @@
+Arguments, Type, Description
+machine, ``BSPM_machine``, instance of ``BSPM_machine``
+nominial_op_pt,``BSPM_Machine_Oper_Pt``, nominal operating point of BSPM Machine under evaluation
+Kf_op_pt, list (default - *None*), list containing instances of `BSPM_Machine_Oper_Pt` for Kf simulations
+Kt_op_pt, list (default - *None*), list containing instances of `BSPM_Machine_Oper_Pt` for Kt simulations
+Kphi_op_pt, list (default - *None*), list containing instances of `BSPM_Machine_Oper_Pt` for Kphi simulations
+Kdelta_coords, list (default - *None*),list of [x y] coordinates in mm to run Kdelta simulations

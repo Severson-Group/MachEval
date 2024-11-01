@@ -4,11 +4,18 @@ import numpy as np
 import pandas as pd
 import sys
 
-from eMach.mach_eval.analyzers.electromagnetic.bspm.electrical_analysis import (
+
+from .electrical_analysis import (
     CrossSectInnerNotchedRotor as CrossSectInnerNotchedRotor,
 )
-from eMach.mach_eval.analyzers.electromagnetic.bspm.electrical_analysis import CrossSectStator as CrossSectStator
-from eMach.mach_eval.analyzers.electromagnetic.bspm.electrical_analysis.Location2D import Location2D
+from .electrical_analysis import CrossSectStator as CrossSectStator
+from .electrical_analysis.Location2D import Location2D
+
+# from eMach.mach_eval.analyzers.electromagnetic.bspm.electrical_analysis import (
+#     CrossSectInnerNotchedRotor as CrossSectInnerNotchedRotor,
+# )
+# from eMach.mach_eval.analyzers.electromagnetic.bspm.electrical_analysis import CrossSectStator as CrossSectStator
+# from eMach.mach_eval.analyzers.electromagnetic.bspm.electrical_analysis.Location2D import Location2D
 
 sys.path.append(os.path.dirname(__file__) + "/../../../..")
 from mach_opt import InvalidDesign

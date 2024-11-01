@@ -13,6 +13,7 @@ This section provides documentation for the electromagnetic analyzers supported 
     Force Data <force_vector_data>
     Stator Winding Resistance <stator_wdg_res>
     BSPM JMAG 2D FEA <bspm_jmag2d_analyzer>
+    BSPM Machine Constants <bspm_mach_constants_analyzer>
     Winding Factors <winding_factors>
     SynR JMAG 2D FEA <SynR_jmag2d_analyzer>
     Inductance/Saliency <inductance_analyzer>
