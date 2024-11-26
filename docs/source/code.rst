@@ -58,3 +58,49 @@ The purpose of the Results class is to encapsulate the results of the analysis o
 3. Code comments 
     a. Provide short description of each argument (for a function) and return value (or attribute)
     b. Specify argument / return value / attribute units
+
+Machines
+++++++++++++++++++++++++++++++++++++++++++++
+
+Machine modules should be located within ``mach_eval/machines`` and then placed within the appropriate subdirectory.
+
+Each machine module must consist of only **one** of each of the following classes:
+
+1. Machine Class
+2. Machine Operating Point Class
+
+Machine Class
+*******************************************
+
+The Machine class is where the machine definition is expected to occur, and it should also specify any machine variable desired in processing or post-processing. Aspects to consider:
+
+1. Requirements to fully define machine
+    a. Each machine must contain parameters (such as rotor, stator, winding, etc.) defined in the ``machine`` and ``radial_machine`` classes located in the  ``mach_eval/machines`` directory.
+    b. Initialize dictionaries for ``dimensions``, ``parameters``, ``materials``, and ``winding`` to fully define a ``machine`` or ``radial_machine``.
+    c. Check defined dictonaries against machine requirements, and throw error if machine is not fully defined.
+        * Required to validate if machine is fully defined
+        * Check defined dictonaries against machine requirements
+        * Throws error if machine is not fully defined
+    d. Machine properties are required for any machine variable desired in processing or post-processing
+2. Code comments on user input
+    a. Provide short description of each argument for each dictionary 
+    b. Specify argument units if applicable
+
+Machine Operating Point Class
+*******************************************
+
+The purpose of the Machine Operating Point class is to define an operating point for the machine defined in the previous step. Aspects to consider:
+
+1. Requirements to fully define operating point
+    a. Operating point definitions will differ with applications
+    b. All necessary information about the operating state of the machine must be defined here
+2. Code comments on user input
+    a. Provide short description of each operating point argument 
+    b. Specify argument units if applicable
+    
+Recommended practices
+*******************************************
+1. Provide machine specific definitions in machine class 
+2. Profide only operating point specific definitions in operating point class
+    a. Provide machine specific definitions in machine class 
+    b. Profide only operating point specific definitions in operating point class
