@@ -28,3 +28,4 @@ class JMAG_2D_Config:
         self.jmag_scheduler = kwargs["jmag_scheduler"] # True if it is desired to schedule jobs instead of solving immediately
         self.jmag_visible = kwargs["jmag_visible"] # JMAG application visible if true
         self.jmag_version = kwargs["jmag_version"] # JMAG application version
+        self.enable_eddy_current_calcs = kwargs.get("enable_eddy_current_calcs", True)  # Enable eddy current calculations for the shaft and permanent magnets if True (default), disable if False
