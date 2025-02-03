@@ -753,15 +753,21 @@ class BSPM_EM_Analyzer:
             "Shaft", self.machine_variant.shaft_mat["shaft_material"]
         )
         study.GetMaterial("Shaft").SetValue("Laminated", 0)
-        study.GetMaterial("Shaft").SetValue("EddyCurrentCalculation", 1)
-
+        if self.config.enable_eddy_current_calcs:
+            study.GetMaterial("Shaft").SetValue("EddyCurrentCalculation", 1)
+        else:
+            study.GetMaterial("Shaft").SetValue("EddyCurrentCalculation", 0)
+        
         study.SetMaterialByName("Coils", "Copper")
         study.GetMaterial("Coils").SetValue("UserConductivityType", 1)
 
         study.SetMaterialByName(
             "Magnet", "{}".format(self.machine_variant.magnet_mat["magnet_material"])
         )
-        study.GetMaterial("Magnet").SetValue("EddyCurrentCalculation", 1)
+        if self.config.enable_eddy_current_calcs:
+            study.GetMaterial("Magnet").SetValue("EddyCurrentCalculation", 1)
+        else:
+            study.GetMaterial("Magnet").SetValue("EddyCurrentCalculation", 0)
         study.GetMaterial("Magnet").SetValue(
             "Temperature", self.operating_point.ambient_temp + self.operating_point.rotor_temp_rise
         )  # TEMPERATURE (There is no 75 deg C option)
