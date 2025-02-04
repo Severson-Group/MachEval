@@ -21,7 +21,7 @@ their own custom scripts for using its functionalities.
 +               +----------------------------------------------------------------------------------------+--------------------------------------------------------------+
 |               | :doc:`BSPM Evaluation Tutorial <bspm_eval_tutorial/index>`                             | Multi-physics evaluation of BSPM designs                     |
 +---------------+----------------------------------------------------------------------------------------+--------------------------------------------------------------+
-| ``mach_opt``  | :doc:`Ractangle Optimization Tutorial <rectangle_tutorial/index>`                      | Run a basic optimization using ``mach_opt``                  |
+| ``mach_opt``  | :doc:`Rectangle Optimization Tutorial <rectangle_tutorial/index>`                      | Run a basic optimization using ``mach_opt``                  |
 +               +----------------------------------------------------------------------------------------+--------------------------------------------------------------+
 |               | :doc:`Analytical Machine Optimization Tutorial <analytical_machine_opt_tutorial/index>`| Use ``mach_eval`` and ``mach_opt`` together for optimization |
 +               +----------------------------------------------------------------------------------------+--------------------------------------------------------------+
