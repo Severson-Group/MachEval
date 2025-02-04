@@ -9,6 +9,9 @@ from typing import Protocol, runtime_checkable, Any
 from abc import abstractmethod, ABC
 import numpy as np
 import pickle
+import time
+import sys
+import multiprocessing as mp
 
 __all__ = [
     "DesignOptimizationMOEAD",
@@ -32,13 +35,13 @@ class DesignOptimizationMOEAD:
         pop = pg.population(self.prob, size=pop_size)
         return pop
 
-    def run_optimization(self, pop, gen_size, filepath=None):
+    def run_optimization(self, pop, gen_size, filepath=None, pg_neighbors=20):
         algo = pg.algorithm(
             pg.moead(
                 gen=1,
                 weight_generation="grid",
                 decomposition="tchebycheff",
-                neighbours=20,
+                neighbours=pg_neighbors,
                 CR=1,
                 F=0.5,
                 eta_m=20,
@@ -93,11 +96,13 @@ class DesignProblem:
         design_space: "DesignSpace",
         dh: "DataHandler",
         invalid_design_objs=None,
+        crash_safe_evaluation=False,
     ):
         self.__designer = designer
         self.__evaluator = evaluator
         self.__design_space = design_space
         self.__dh = dh
+        self.__crash_safe_evaluation = crash_safe_evaluation
 
         if invalid_design_objs is None:
             self.__invalid_design_objs = 1e4 * np.ones([1, self.get_nobj()])
@@ -107,6 +112,27 @@ class DesignProblem:
             self.__invalid_design_objs = invalid_design_objs
 
         dh.save_designer(designer)
+
+    @staticmethod
+    def evaluate_design_func(evaluator, design, queue: mp.Queue):
+        try:
+            # Run the evaluator (this is slow and might crash!)
+            full_results = evaluator.evaluate(design)
+        except InvalidDesign:
+            # Tell caller this design is invalid with code 1
+            sys.exit(1)
+        except Exception:
+            # Some other failure... tell caller with code 2
+            sys.exit(2)
+
+        # Tell parent we are done
+        queue.put(True)
+
+        # Give the result to the caller process
+        queue.put(full_results)
+
+        # Code of 0 means this eval was a success
+        sys.exit(0)
 
     def fitness(self, x: "tuple") -> "tuple":
         """Calculates the fitness or objectives of each design based on evaluation results.
@@ -125,7 +151,56 @@ class DesignProblem:
         """
         try:
             design = self.__designer.create_design(x)
-            full_results = self.__evaluator.evaluate(design)
+
+            ###############################################
+            # Evaluate the design
+            ###############################################
+
+            if not self.__crash_safe_evaluation:
+                full_results = self.__evaluator.evaluate(design)
+            else:
+                # Make a new process to evaluate the design
+                queue = mp.Queue()
+                p = mp.Process(
+                    target=self.evaluate_design_func,
+                    args=(
+                        self.__evaluator,
+                        design,
+                        queue,
+                    ),
+                )
+                p.start()
+
+                # Wait for evalulation to complete, or it to crash
+                is_done = False
+                while not is_done:
+                    if queue.empty():
+                        time.sleep(0.1)
+
+                        if p.exitcode is not None:
+                            # Child process (evaluation) is done
+                            if p.exitcode != 0:
+                                if p.exitcode not in [1, 2]:
+                                    # Unknown error during design evaluation
+                                    # (NOT InvalidDesign or Exception)
+                                    # Breakpoint here can catch JMAG crash
+                                    pass
+
+                                # It was not successful
+                                raise InvalidDesign("Bad design (code %d)" % p.exitcode)
+                    else:
+                        is_done = queue.get()
+
+                # We know the child process will put the results
+                # into the queue right NOW, so pull them out to
+                # trigger the queue's buffer to flush......see:
+                # https://stackoverflow.com/questions/26025486/#comment40796894_26041762
+                full_results = queue.get()
+
+                # The process should be done by now,
+                # but make sure by joining it here
+                p.join()
+
             objs = self.__design_space.get_objectives(full_results)
             self.__dh.save_to_archive(x, design, full_results, objs)
             # print('The fitness values are', objs)
