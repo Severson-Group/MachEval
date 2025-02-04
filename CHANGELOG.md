@@ -2,6 +2,10 @@
 
 This document summarizes the changes introduced to the code base for each release.
 
+## v1.2.0
+
+- Add ability to disable eddy currents in BSPM analyzer
+
 ## v1.1.0
 
 - Fix BSPM example analyzer filename
