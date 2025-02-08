@@ -1,6 +1,10 @@
 # Required
 version: 2
 
+# RTD requires specifying path to Sphinx config file
+sphinx:
+  configuration: docs/source/conf.py
+  
 # Set the version of Python and other tools you might need
 build:
   os: ubuntu-20.04
