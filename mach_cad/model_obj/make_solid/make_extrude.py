@@ -39,5 +39,7 @@ class MakeExtrude(MakeSolidBase):
 
         token2 = maker.extrude(name, material, self._dim_depth, token1)
 
+        maker.move(name, self.location)
+
         token_make = TokenMake(cs_token, token1, token2)
         return token_make
