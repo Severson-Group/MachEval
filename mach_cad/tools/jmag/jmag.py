@@ -361,6 +361,58 @@ class JmagDesigner(
         self.study.SetMaterialByName(name, material.name)
         return extrude_part
 
+    def move(self, name: str, location: 'Location3D') -> any:
+        """Function to move the newly solid part to the final location
+
+        Args:
+            name: name of the newly extruded component.
+            location: the displacement from the part's origin to the global origin.
+
+        Returns:
+            Function will return the handle to move part to new location
+        """
+
+        move_x = eval(self.default_length)(location.anchor_xyz[0])
+        move_y = eval(self.default_length)(location.anchor_xyz[1])
+        move_z = eval(self.default_length)(location.anchor_xyz[2])
+
+        self.assembly.GetItem(name).ClosePart()
+        self.doc.GetSelection().Clear()
+        ref1 = self.assembly().GetItem(name)
+        self.doc.GetSelection().Add(ref1)
+        move_part = self.doc.GetAssemblyManager().CreateMovePartParameter()
+        move_part.SetProperty("MoveX", move_x)
+        move_part.SetProperty("MoveY", move_y)
+        move_part.SetProperty("MoveZ", move_z)
+        self.doc.GetAssemblyManager().Execute(move_part)
+
+        # depth = eval(self.default_length)(depth)
+
+        # self.part = self.create_part()
+        # ref1 = self.sketch
+
+        # extrude_part = self.part.CreateExtrudeSolid(ref1, depth)
+        # self.part.SetProperty("Name", name)
+        # self.part.SetProperty("Color", material.color)
+
+        # sketch_name = name + "_sketch"
+        # self.sketch.SetProperty("Name", sketch_name)
+
+        # self.part = None
+        # self.sketch = None
+        # self.doc.SaveModel(True)
+        # model_name = name + "_model"
+        # self.model = self.create_model(model_name)
+
+        # study_name = name + "_study"
+        # self.study = self.create_study(study_name, self.study_type, self.model)
+
+        # self.set_default_length_unit(self.default_length)
+        # self.set_default_angle_unit(self.default_angle)
+
+        # self.study.SetMaterialByName(name, material.name)
+        return move_part
+
     def revolve(self, name, material: str, center, axis, angle: float,) -> any:
         """ Revolves cross-section along an arc
 
