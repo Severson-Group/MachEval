@@ -405,6 +405,20 @@ class JmagDesigner(
         self.part.GetItem("Revolve").setProperty("AxisVecZ", 0)
         self.part.GetItem("Revolve").setProperty("Angle", angle)
         self.part.SetProperty("Name", name)
+
+        self.assembly.GetItem(name).ClosePart()
+        self.doc.GetSelection().Clear()
+        ref2 = self.assembly.GetItem(name)
+        self.doc.GetSelection().Add(ref2)
+        move_part = self.doc.GetAssemblyManager().CreateMovePartParameter()
+        move_x = eval(self.default_length)(location.anchor_xyz[0])
+        move_y = eval(self.default_length)(location.anchor_xyz[1])
+        move_z = eval(self.default_length)(location.anchor_xyz[2])
+        move_part.SetProperty(u"MoveX", move_x)
+        move_part.SetProperty(u"MoveY", move_y)
+        move_part.SetProperty(u"MoveZ", move_z)
+        self.doc.GetAssemblyManager().Execute(move_part)
+
         sketch_name = name + "_sketch"
         self.sketch.SetProperty("Name", sketch_name)
 
