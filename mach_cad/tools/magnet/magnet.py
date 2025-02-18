@@ -136,13 +136,14 @@ class MagNet(abc.ToolBase, abc.DrawerBase, abc.MakerExtrudeBase, abc.MakerRevolv
         )
         return 1
 
-    def extrude(self, name, material, depth, token=None):
+    def extrude(self, name, material, depth, location, token=None):
         """Extrude, assign a material and name a selected section in MAGNET.
 
         Args:
             name: Name assigned to extruded component.
             material: Name of material from tool library whose properties are assigned to component.
             depth: Length of extrusion. Should be of type DimLinear.
+            location: Not used currently.
             token: Not used currently.
 
         Returns:
@@ -159,7 +160,7 @@ class MagNet(abc.ToolBase, abc.DrawerBase, abc.MakerExtrudeBase, abc.MakerRevolv
 
         return ret
 
-    def revolve(self, name, material, center, axis, angle, token=None):
+    def revolve(self, name, material, center, axis, angle, location, token=None):
         """Revolve, assign a material and name a selected section in MAGNET.
 
         Args:
@@ -170,6 +171,7 @@ class MagNet(abc.ToolBase, abc.DrawerBase, abc.MakerExtrudeBase, abc.MakerRevolv
             axis: Axis about which the cross-section is revolved. Should be of type Location2D defined with eMach
                 Dimensions.
             angle: Angle of revolution. Should be of type DimAngular.
+            location: Not used currently.
             token: Not used currently.
 
         Returns:
