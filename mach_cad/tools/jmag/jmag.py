@@ -375,7 +375,7 @@ class JmagDesigner(
         self.study.SetMaterialByName(name, material.name)
         return extrude_part
 
-    def revolve(self, name, material: str, center, axis, angle: float,) -> any:
+    def revolve(self, name, material: str, center, axis, angle: float, location: "Location3D") -> any:
         """ Revolves cross-section along an arc
 
         Args:
@@ -384,6 +384,7 @@ class JmagDesigner(
             center: center point of rotation. Should be of type Location2d defined with eMach Dimensions.
             axis: Axis of rotation. Should be of type Location2d defined with eMach Dimensions.
                   Specifying negative value reverses the axis of rotation.
+            location: the displacement from the part's origin to the global origin.
 
         Returns:
              This function will return the handle of the newly revolved part.

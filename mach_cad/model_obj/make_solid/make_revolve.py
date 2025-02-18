@@ -63,9 +63,9 @@ class MakeRevolve(MakeSolidBase):
             token1.append(maker.prepare_section(cs_token[i]))
 
         token2 = maker.revolve(
-            name, material, self._dim_center, self._dim_axis, self._dim_angle, token1
+            name, material, self._dim_center, self._dim_axis, self._dim_angle, self.location, token1
         )
-        
+
         token_make = TokenMake(cs_token, token1, token2)
 
         token_make = TokenMake(cs_token, token1, token2)
