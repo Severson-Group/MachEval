@@ -322,13 +322,14 @@ class JmagDesigner(
 
         return study
 
-    def extrude(self, name, material: str, depth: float, token=None) -> any:
+    def extrude(self, name, material: str, depth: float, location: "Location3D", token=None) -> any:
         """ Extrudes a cross-section to a 3D component
 
         Args:
             name: name of the newly extruded component.
             depth: Depth of extrusion. Should be defined with eMach Dimensions.
             material : Material applied to the extruded component.
+            location: the displacement from the part's origin to the global origin.
 
         Returns:
             Function will return the handle to the new extruded part
@@ -342,6 +343,19 @@ class JmagDesigner(
         extrude_part = self.part.CreateExtrudeSolid(ref1, depth)
         self.part.SetProperty("Name", name)
         self.part.SetProperty("Color", material.color)
+
+        self.assembly.GetItem(name).ClosePart()
+        self.doc.GetSelection().Clear()
+        ref2 = self.assembly.GetItem(name)
+        self.doc.GetSelection().Add(ref2)
+        move_part = self.doc.GetAssemblyManager().CreateMovePartParameter()
+        move_x = eval(self.default_length)(location.anchor_xyz[0])
+        move_y = eval(self.default_length)(location.anchor_xyz[1])
+        move_z = eval(self.default_length)(location.anchor_xyz[2])
+        move_part.SetProperty(u"MoveX", move_x)
+        move_part.SetProperty(u"MoveY", move_y)
+        move_part.SetProperty(u"MoveZ", move_z)
+        self.doc.GetAssemblyManager().Execute(move_part)
 
         sketch_name = name + "_sketch"
         self.sketch.SetProperty("Name", sketch_name)
