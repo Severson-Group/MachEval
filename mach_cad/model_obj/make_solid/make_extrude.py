@@ -37,9 +37,7 @@ class MakeExtrude(MakeSolidBase):
         for i in range(len(cs_token)):
             token1.append(maker.prepare_section(cs_token[i]))
 
-        token2 = maker.extrude(name, material, self._dim_depth, token1)
-
-        maker.move(name, self.location)
+        token2 = maker.extrude(name, material, self._dim_depth, self.location, token1)
 
         token_make = TokenMake(cs_token, token1, token2)
         return token_make
