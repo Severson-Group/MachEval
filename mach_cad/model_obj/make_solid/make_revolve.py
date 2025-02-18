@@ -67,6 +67,4 @@ class MakeRevolve(MakeSolidBase):
         )
 
         token_make = TokenMake(cs_token, token1, token2)
-
-        token_make = TokenMake(cs_token, token1, token2)
         return token_make
