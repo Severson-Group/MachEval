@@ -70,11 +70,11 @@ class MakerBase(ABC):
 class MakerExtrudeBase(MakerBase):
     """Abstract base class defining method(s) to extrude cross-sections in eMach tools"""
     @abstractmethod
-    def extrude(self, name: str, material: str, depth: 'DimLinear') -> any:
+    def extrude(self, name: str, material: str, depth: 'DimLinear', location: 'Location3D') -> any:
         pass
 
 
 class MakerRevolveBase(MakerBase):
     """Abstract base class defining method(s) to revolve cross-sections in eMach tools"""
     @abstractmethod
-    def revolve(self, name: str, material: str, center: 'Location2D', axis: 'Location2D', angle: float) -> any: pass
+    def revolve(self, name: str, material: str, center: 'Location2D', axis: 'Location2D', angle: float, location: 'Location3D') -> any: pass
