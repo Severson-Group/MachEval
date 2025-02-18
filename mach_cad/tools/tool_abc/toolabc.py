@@ -66,11 +66,6 @@ class MakerBase(ABC):
         """Function to select a cross-section"""
         pass
 
-    @abstractmethod
-    def move(self, name: str, location: 'Location3D') -> any:
-        """Function to move the newly solid part to the final location"""
-        pass
-
 
 class MakerExtrudeBase(MakerBase):
     """Abstract base class defining method(s) to extrude cross-sections in eMach tools"""
