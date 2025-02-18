@@ -294,7 +294,7 @@ class FEMMDesigner(
         """
         return cs_token
 
-    def extrude(self, name, material: str, depth: float, token=None) -> any:
+    def extrude(self, name, material: str, depth: float, location: "Location3D", token=None) -> any:
         """ Assign material to a component. 
         Axial length has to be specified using "probdef" method.
         """
@@ -306,7 +306,7 @@ class FEMMDesigner(
 
         return 1
 
-    def revolve(self, name, material: str, center, axis, angle: float,) -> any:
+    def revolve(self, name, material: str, center, axis, angle: float, location: "Location3D") -> any:
         """ Not implemented in FEMM. 
         Axisymmetric problem has to be specified using "probdef" method.
         """
