@@ -329,7 +329,7 @@ class JmagDesigner(
             name: name of the newly extruded component.
             depth: Depth of extrusion. Should be defined with eMach Dimensions.
             material : Material applied to the extruded component.
-            location: the displacement from the part's origin to the global origin.
+            location: the displacement from the global origin the part's origin.
 
         Returns:
             Function will return the handle to the new extruded part
