@@ -49,14 +49,14 @@ comp1 = mo.Component(
     name="comp1",
     cross_sections=[stator1],
     material=mo.MaterialGeneric(name="10JNEX900"),
-    make_solid=mo.MakeExtrude(location=mo.Location3D(), dim_depth=mo.DimMillimeter(15)),
+    make_solid=mo.MakeExtrude(location=mo.Location3D(anchor_xyz=[mo.DimMillimeter(0), mo.DimMillimeter(0), mo.DimMillimeter(10)]), dim_depth=mo.DimMillimeter(15)),
 )
 
 comp2 = mo.Component(
     name="comp2",
     cross_sections=[stator2],
     material=mo.MaterialGeneric(name="10JNEX900"),
-    make_solid=mo.MakeExtrude(location=mo.Location3D(), dim_depth=mo.DimMillimeter(15)),
+    make_solid=mo.MakeExtrude(location=mo.Location3D(anchor_xyz=[mo.DimMillimeter(0), mo.DimMillimeter(0), mo.DimMillimeter(-10)]), dim_depth=mo.DimMillimeter(15)),
 )
 
 file = r"trial100.jproj"
